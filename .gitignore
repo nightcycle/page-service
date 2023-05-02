@@ -1,7 +1,6 @@
 
 
 # Directories
-out/**
 Packages/**
 scripts/compile/__pycache__/**
 
