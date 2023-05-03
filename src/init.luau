@@ -11,6 +11,9 @@ local ServiceProxy = require(Packages:WaitForChild("ServiceProxy"))
 local GuiLibrary = require(Packages:WaitForChild("GuiLibrary"))
 
 -- Modules
+local Prompt = require(script:WaitForChild("Prompt"))
+local Notification = require(script:WaitForChild("Notification"))
+local Menu = require(script:WaitForChild("Menu"))
 
 -- Types
 type Maid = Maid.Maid
@@ -19,6 +22,9 @@ type Fuse = ColdFusion.Fuse
 type ValueState<T> = ColdFusion.ValueState<T>
 type State<T> = ColdFusion.State<T>
 type ParameterValue<T> = (State<T> | T)
+type PromptFrame = Prompt.PromptFrame
+type NotificationFrame = Notification.NotificationFrame
+type Menu = Menu.Menu
 
 type Step = {
 	Path: string,
@@ -29,6 +35,9 @@ export type PageService = {
 	__index: PageService,
 	_IsAlive: boolean,
 	_Maid: Maid,
+	Prompt: PromptFrame,
+	Notification: NotificationFrame,
+	Menu: Menu,
 	Instance: ScreenGui,
 	Destroy: (self: PageService) -> nil,
 	new: (parent: GuiObject?) -> PageService,
@@ -76,7 +85,16 @@ function Service.new(): PageService
 
 	self.Instance = _new("ScreenGui")({
 		Name = "PageService",
-	}) :: any
+	}) :: ScreenGui
+
+	self.Prompt = self._Maid:GiveTask(Prompt.new())
+	self.Prompt.Instance.Parent = self.Instance
+
+	self.Notification = self._Maid:GiveTask(Notification.new())
+	self.Notification.Instance.Parent = self.Instance
+
+	self.Menu = self._Maid:GiveTask(Menu.new())
+	self.Menu.Instance.Parent = self.Instance
 
 	if currentService then
 		currentService:Destroy()
@@ -89,6 +107,7 @@ end
 
 function Service.init(maid: Maid)
 	if currentService == nil then
+		GuiLibrary.init(maid)
 		maid:GiveTask(Service.new())
 	end
 	return nil

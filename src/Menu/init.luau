@@ -32,12 +32,16 @@ export type MenuParameters = {
 }
 export type Menu = {
 	_Maid: Maid,
+	_IsAlive: boolean,
 	__index: Menu,
 	_Currencies: { [string]: ValueState<number> },
+	_CurrencyFrameVisible: ValueState<boolean>,
 	new: (config: MenuParameters?) -> Menu,
 	Destroy: (self: Menu) -> nil,
 	Instance: Frame,
 	_CurrencyFrame: Frame,
+	_ButtonFrame: Frame,
+	Visible: ValueState<boolean>,
 	CurrentPath: ValueState<string>,
 	SetButton: (
 		self: Menu,
@@ -45,7 +49,7 @@ export type Menu = {
 		icon: string,
 		hint: string,
 		layoutOrder: number,
-		signal: Signal,
+		signal: Signal?,
 		enabledState: State<boolean>?
 	) -> GuiObject,
 	SetCurrency: (
@@ -100,9 +104,9 @@ function Menu:SetCurrency(
 			return StyleGuide.getReadableColor(color, background)
 		end, StyleGuide:GetColor(PseudoEnum.GuiColorPalette.Surface1)),
 		TextSize = StyleGuide:GetTextSize(PseudoEnum.GuiTypography.Button),
-		Font = StyleGuide:GetFont(PseudoEnum.GuiTypography.Button),
+		FontFace = StyleGuide:GetFont(PseudoEnum.GuiTypography.Button),
 	})
-
+	self._CurrencyFrameVisible:Set(true)
 	return
 end
 
@@ -115,7 +119,7 @@ function Menu:SetButton(
 	icon: string,
 	hint: string,
 	layoutOrder: number,
-	signal: Signal,
+	signal: Signal?,
 	enabledState: State<boolean>?
 )
 	local maid = self._Maid:GiveTask(Maid.new())
@@ -179,7 +183,7 @@ function Menu:SetButton(
 		-- SizeConstraint = Enum.SizeConstraint.RelativeYY,
 		ClickSound = GuiLibrary.Sound.Click,
 		CornerRadius = UDim.new(0, 0),
-		Parent = self.Instance:WaitForChild("ButtonContainer"),
+		Parent = self._ButtonFrame,
 		LeftIcon = icon,
 		RightIcon = nil,
 	})
@@ -197,6 +201,8 @@ function Menu:SetButton(
 end
 
 function Menu:Destroy()
+	if not self._IsAlive then return end
+	self._IsAlive = false
 	self._Maid:Destroy()
 	local t: any = self
 	for k, v in pairs(t) do
@@ -208,13 +214,12 @@ end
 
 function Menu.new(): Menu
 
-	local _maid = Maid.new()
-	local _buildMaid = Maid.new()
-	_maid:GiveTask(_buildMaid)
+	local self: Menu = setmetatable({}, Menu) :: any
+	self._IsAlive = true
+	self._Maid = Maid.new()
 
-	local _synth = Synthetic(_maid)
-	local _fuse = ColdFusion.fuse(_maid)
-	local _library = GuiLibrary.new(_maid)
+	local _fuse = ColdFusion.fuse(self._Maid)
+	local _library = GuiLibrary.new(self._Maid)
 	local _new = _fuse.new
 	local _bind = _fuse.bind
 	local _import = _fuse.import
@@ -222,117 +227,63 @@ function Menu.new(): Menu
 	local _Value = _fuse.Value
 	local _Computed = _fuse.Computed
 
-	-- Parameter states
-	-- Private states
-	local Visible = _Value(true)
+	self.Visible = _Value(true)
+
 	local BarHeight = _Computed(
 		function(textSize: number, padding: UDim)
-			return textSize + padding.Offset
+			return textSize + padding.Offset * 2
 		end,
 		StyleGuide:GetTextSize(PseudoEnum.GuiTypography.Headline5),
 		StyleGuide:GetPadding(PseudoEnum.GuiDensityModifier.Default)
 	)
-	local CurrencyFrameVisible = _Value(false)
-
-	local CurrencyFrame: Frame = _new("Frame")({
-		BackgroundColor3 = StyleGuide:GetColor(PseudoEnum.GuiColorPalette.Surface1),
-		AutomaticSize = Enum.AutomaticSize.XY,
-		LayoutOrder = 0,
-		Visible = CurrencyFrameVisible,
-		Children = {
-			_library.Effect:GetUICorner() :: any,
-			_library.Layout:GetHorizontalList(PseudoEnum.GuiAlignmentType.Center, PseudoEnum.GuiDensityModifier.High),
-			_new("UIPadding")({
-				PaddingLeft = _Computed(function(txtSize: number)
-					return UDim.new(0, txtSize)
-				end, StyleGuide:GetTextSize(PseudoEnum.GuiTypography.Body1)),
-				PaddingRight = _Computed(function(txtSize: number)
-					return UDim.new(0, txtSize)
-				end, StyleGuide:GetTextSize(PseudoEnum.GuiTypography.Body1)),
-				PaddingTop = StyleGuide:GetPadding(PseudoEnum.GuiDensityModifier.Default),
-				PaddingBottom = StyleGuide:GetPadding(PseudoEnum.GuiDensityModifier.High),
-			}),
+	self._ButtonFrame = _library.Layout:GetContainer(
+		{
+			_library.Layout:GetHorizontalList(PseudoEnum.GuiAlignmentType.Bottom),
 		},
-	}) :: any
+		nil,
+		2,
+		"ButtonContainer",
+		nil,
+		false
+	) :: Frame
 
-	local inst: Frame = _new("Frame")({
-		AutomaticSize = Enum.AutomaticSize.XY,
-		AnchorPoint = _Computed(function(vis: boolean)
-			if vis then
-				return Vector2.new(0.5, 0.5)
-			else
-				return Vector2.new(0.5, 1)
-			end
-		end, Visible):Tween(0.2),
-		Size = UDim2.fromOffset(0, 0),
-		Position = _Computed(function(vis: boolean)
-			return UDim2.new(0.5, 0, 0, if vis then 0 else -TOP_BAR_INSET)
-		end, Visible):Tween(0.2),
-		BackgroundTransparency = 1,
-		ZIndex = 100,
-		BorderSizePixel = 0,
-		Name = "Menu",
-		Children = {
-			_new("UIPadding")({
-				PaddingTop = StyleGuide:GetPadding(PseudoEnum.GuiDensityModifier.Default),
-				PaddingBottom = UDim.new(0, 0), --StyleGuide:GetPadding(PseudoEnum.GuiDensityModifier.Default),
-				PaddingLeft = UDim.new(0, 0), --StyleGuide:GetPadding(PseudoEnum.GuiDensityModifier.Default),
-				PaddingRight = UDim.new(0, 0), --StyleGuide:GetPadding(PseudoEnum.GuiDensityModifier.Default),
-			}),
-			_new("UIListLayout")({
-				Padding = UDim.new(0, 0),
-				SortOrder = Enum.SortOrder.LayoutOrder,
-				FillDirection = Enum.FillDirection.Vertical,
-				HorizontalAlignment = Enum.HorizontalAlignment.Center,
-				VerticalAlignment = Enum.VerticalAlignment.Bottom,
-			}),
 
-			_new("Frame")({
-				Name = "ButtonContainer",
-				LayoutOrder = 2,
-				BackgroundTransparency = 0,
-				AutomaticSize = Enum.AutomaticSize.XY,
-				ClipsDescendants = true,
-				Size = UDim2.fromOffset(0, 0),
-				BackgroundColor3 = StyleGuide:GetColor(PseudoEnum.GuiColorPalette.Surface2),
-				AnchorPoint = Vector2.new(0, 1),
-				Children = {
-					_new("UICorner")({
-						CornerRadius = StyleGuide.CornerRadius,
-					}) :: any,
-					-- _new("UIListLayout")({
-					-- 	Padding = UDim.new(0,0),
-					-- 	SortOrder = Enum.SortOrder.LayoutOrder,
-					-- 	FillDirection = Enum.FillDirection.Horizontal,
-					-- 	HorizontalAlignment = Enum.HorizontalAlignment.Center,
-					-- 	VerticalAlignment = Enum.VerticalAlignment.Center,
-					-- }),
-					_library.Layout:GetHorizontalList(PseudoEnum.GuiAlignmentType.Top),
-					-- CurrencyFrame
-					_new("Frame")({
-						BackgroundTransparency = 1,
-						AutomaticSize = Enum.AutomaticSize.X,
-						Size = _Computed(
-							function(txtSize: number, pad: UDim)
-								return UDim2.fromOffset(0, txtSize + pad.Offset * 2)
-							end,
-							StyleGuide:GetTextSize(PseudoEnum.GuiTypography.Headline6),
-							StyleGuide:GetPadding(PseudoEnum.GuiDensityModifier.Low)
-						),
-						Children = {
-							_library.Layout:GetVerticalList(PseudoEnum.GuiAlignmentType.Center) :: any,
-							-- _library.Layout:GetUIPadding(PseudoEnum.GuiDensityModifier.High)
-							_new("UIPadding")({
-								PaddingTop = StyleGuide:GetPadding(PseudoEnum.GuiDensityModifier.Default),
-								PaddingBottom = UDim.new(0, 0), --StyleGuide:GetPadding(PseudoEnum.GuiDensityModifier.Default),
-								PaddingLeft = UDim.new(0, 0), --StyleGuide:GetPadding(PseudoEnum.GuiDensityModifier.Default),
-								PaddingRight = StyleGuide:GetPadding(PseudoEnum.GuiDensityModifier.High), --StyleGuide:GetPadding(PseudoEnum.GuiDensityModifier.Default),
-							}),
-							CurrencyFrame,
-						},
-					}),
+	self._Currencies = {}
+	self._CurrencyFrameVisible = _Value(false)
+	self._CurrencyFrame = _bind(_library.Layout:GetContainer(
+		{
+			_library.Effect:GetUICorner() :: any,
+
+			_library.Layout:GetHorizontalList(PseudoEnum.GuiAlignmentType.Bottom),
+			
+		},
+		PseudoEnum.GuiDensityModifier.Default,
+		0,
+		"CurrencyFrame",
+		PseudoEnum.GuiColorPalette.Surface1,
+		false
+	))({
+		Visible = self._CurrencyFrameVisible,
+	}) :: Frame
+
+
+
+	self.Instance = _bind(_library.Layout:GetContainer(
+		{
+			_library.Layout:GetVerticalList(PseudoEnum.GuiAlignmentType.Bottom, PseudoEnum.GuiDensityModifier.Low),
+			_library.Layout:GetContainer(
+				{
+					_library.Effect:GetUICorner() :: any,
+					_library.Layout:GetHorizontalList(PseudoEnum.GuiAlignmentType.Center, "High"),
+				self._ButtonFrame,
+					self._CurrencyFrame,
 				},
-			}),
+				nil,
+				2,
+				"Content",
+				nil,
+				false
+			),
 			_new("Frame")({
 				Name = "Filler",
 				LayoutOrder = 1,
@@ -342,23 +293,24 @@ function Menu.new(): Menu
 					return UDim2.fromOffset(0, height)
 				end, BarHeight),
 			}),
-		} :: { [number]: any },
-	}) :: any
-
-	local self: Menu = setmetatable({}, Menu) :: any
-	self._Maid = _maid
-	self.Instance = inst
-	self._Currencies = {}
-	self._CurrencyFrame = CurrencyFrame
-
-	local OnHomeClick = Signal.new()
-	_maid:GiveTask(OnHomeClick)
-
-	local OnBackClick = Signal.new()
-	_maid:GiveTask(OnBackClick)
-
-	local OnSettingsClick = Signal.new()
-	_maid:GiveTask(OnSettingsClick)
+		},
+		PseudoEnum.GuiDensityModifier.High,
+		nil,
+		"Menu",
+		PseudoEnum.GuiColorPalette.Surface2,
+		false
+	))({
+		AnchorPoint = _Computed(function(vis: boolean)
+			if vis then
+				return Vector2.new(0.5, 0.5)
+			else
+				return Vector2.new(0.5, 1)
+			end
+		end, self.Visible):Tween(0.2),
+		Position = _Computed(function(vis: boolean)
+			return UDim2.new(0.5, 0, 0, if vis then 0 else -TOP_BAR_INSET)
+		end, self.Visible):Tween(0.2),
+	}) :: Frame
 
 	return self
 end

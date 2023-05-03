@@ -1,5 +1,3 @@
-#!/bin/bash
-# A sample Bash script
 echo Starting Wally Update	# This is a comment, too!
 wally-update major
 wally install
