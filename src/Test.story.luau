@@ -11,11 +11,12 @@ return function(coreGui: ScreenGui)
 	task.spawn(function()
 		local PageService = require(Package)
 		PageService.init(maid)
+		PageService.VersionText:Set("1.0.0")
 		PageService.Instance.Parent = coreGui
 
-		PageService.Prompt:Fire("Hello!", function()
-			print("click")
-		end)
+		-- PageService.Prompt:Fire("Hello!", function()
+		-- 	print("click")
+		-- end)
 
 	end)
 

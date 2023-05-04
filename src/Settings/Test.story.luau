@@ -17,10 +17,8 @@ return function(coreGui: ScreenGui)
 
 		local Module = require(ModuleInstance)
 		local module = maid:GiveTask(Module.new())
-		module.Instance.Parent = coreGui
-		module:Fire("Notification test! Do not be alarmed!", 5)
-		-- task.wait(2.5)
-		-- module:Fire("I lied! Be very alarmed!", 5)
+		local inst = module:Build()
+		inst.Parent = coreGui
 
 	end)
 

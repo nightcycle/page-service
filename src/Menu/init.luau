@@ -11,7 +11,7 @@ local Synthetic = require(Packages:WaitForChild("Synthetic"))
 local ColdFusion = require(Packages:WaitForChild("ColdFusion"))
 local FormatUtil = require(Packages:WaitForChild("FormatUtil"))
 local GuiLibrary = require(Packages:WaitForChild("GuiLibrary"))
-local StyleGuide = GuiLibrary:GetStyleGuide()
+local StyleGuide = GuiLibrary.getStyleGuide()
 
 -- Modules
 local PseudoEnum = require(Package:WaitForChild("PseudoEnum"))
@@ -22,13 +22,15 @@ type Signal = Signal.Signal
 type Fuse = ColdFusion.Fuse
 type ValueState<T> = ColdFusion.ValueState<T>
 type State<T> = ColdFusion.State<T>
-type ParameterValue<T> = (State<T> | T)
+type CanBeState<T> = ColdFusion.CanBeState<T>
 
-export type MenuParameters = {
-	Visible: ParameterValue<boolean>?,
-	ForceHide: ParameterValue<boolean>?,
-	CurrentPath: ParameterValue<string>?,
-	Parent: ParameterValue<GuiObject>?,
+export type ButtonData = {
+	Path: string?,
+	Icon: string,
+	Hint: string,
+	LayoutOrder: number,
+	OnClick: Signal?,
+	IsSelected: State<boolean>?
 }
 export type Menu = {
 	_Maid: Maid,
@@ -36,21 +38,17 @@ export type Menu = {
 	__index: Menu,
 	_Currencies: { [string]: ValueState<number> },
 	_CurrencyFrameVisible: ValueState<boolean>,
-	new: (config: MenuParameters?) -> Menu,
+	Buttons: {[string]: ValueState<ButtonData>},
+	new: () -> Menu,
 	Destroy: (self: Menu) -> nil,
 	Instance: Frame,
 	_CurrencyFrame: Frame,
 	_ButtonFrame: Frame,
 	Visible: ValueState<boolean>,
-	CurrentPath: ValueState<string>,
 	SetButton: (
 		self: Menu,
-		path: string,
-		icon: string,
-		hint: string,
-		layoutOrder: number,
-		signal: Signal?,
-		enabledState: State<boolean>?
+		buttonData: ButtonData,
+		IsVisible: State<boolean>?
 	) -> GuiObject,
 	SetCurrency: (
 		self: Menu,
@@ -95,14 +93,14 @@ function Menu:SetCurrency(
 	_synth("TextLabel")({
 		LeftIcon = icon,
 		Text = _Computed(function(amount: number)
-			return FormatUtil.money(amount, false)
+			return FormatUtil.money(amount, false):gsub("%$", "")
 		end, Amount),
 		BackgroundTransparency = 1,
 		LayoutOrder = layoutOrder,
 		Parent = self._CurrencyFrame,
 		TextColor3 = _Computed(function(background: Color3)
 			return StyleGuide.getReadableColor(color, background)
-		end, StyleGuide:GetColor(PseudoEnum.GuiColorPalette.Surface1)),
+		end, StyleGuide:GetColor(PseudoEnum.GuiColorPalette.Surface5)),
 		TextSize = StyleGuide:GetTextSize(PseudoEnum.GuiTypography.Button),
 		FontFace = StyleGuide:GetFont(PseudoEnum.GuiTypography.Button),
 	})
@@ -115,12 +113,8 @@ function Menu:GetCurrencyState(key: string): ValueState<number>
 end
 
 function Menu:SetButton(
-	path: string,
-	icon: string,
-	hint: string,
-	layoutOrder: number,
-	signal: Signal?,
-	enabledState: State<boolean>?
+	buttonData: ButtonData,
+	IsVisible: State<boolean>?
 )
 	local maid = self._Maid:GiveTask(Maid.new())
 
@@ -136,9 +130,7 @@ function Menu:SetButton(
 	local _Value = _fuse.Value
 	local _Computed = _fuse.Computed
 
-	local IsSelected = _Computed(function(current: string): boolean
-		return current == path
-	end, self.CurrentPath)
+	local IsSelected: State<boolean> = buttonData.IsSelected or _Value(false)
 
 	local BackgroundColor3 = _Computed(
 		function(isSelected: boolean, default: Color3, goal: Color3): Color3
@@ -149,13 +141,13 @@ function Menu:SetButton(
 			end
 		end,
 		IsSelected,
-		StyleGuide:GetColor(PseudoEnum.GuiColorPalette.Surface2),
+		StyleGuide:GetColor(PseudoEnum.GuiColorPalette.Surface6),
 		StyleGuide:GetColor(PseudoEnum.GuiColorPalette.Secondary1)
 	)
 
 	local TextColor3 = _Computed(function(back: Color3, goal: Color3): Color3
 		return StyleGuide.getReadableColor(goal, back)
-	end, BackgroundColor3, StyleGuide:GetContrastColor(PseudoEnum.GuiColorPalette.Surface1))
+	end, BackgroundColor3, StyleGuide:GetContrastColor(PseudoEnum.GuiColorPalette.Surface5))
 
 	local button = _synth("Button")({
 		TextColor3 = TextColor3,
@@ -172,28 +164,30 @@ function Menu:SetButton(
 
 		BackgroundTransparency = 0,
 		BorderTransparency = 1,
-		TextSize = StyleGuide:GetTextSize(PseudoEnum.GuiTypography.Headline6),
-		Padding = StyleGuide:GetPadding(PseudoEnum.GuiDensityModifier.Low),
+		TextSize = StyleGuide:GetTextSize(PseudoEnum.GuiTypography.Button),
+		Padding = StyleGuide:GetPadding(PseudoEnum.GuiDensityModifier.Default),
 		TextOnly = false,
 		Text = nil,
-		Visible = enabledState,
-		LayoutOrder = layoutOrder,
+		Visible = IsVisible,
+		LayoutOrder = buttonData.LayoutOrder,
 		AnchorPoint = Vector2.new(0.5, 0.5),
-		-- Size = UDim2.fromScale(1,1),
-		-- SizeConstraint = Enum.SizeConstraint.RelativeYY,
 		ClickSound = GuiLibrary.Sound.Click,
 		CornerRadius = UDim.new(0, 0),
 		Parent = self._ButtonFrame,
-		LeftIcon = icon,
+		LeftIcon = buttonData.Icon,
 		RightIcon = nil,
 	})
-	if signal then
+
+	if buttonData.OnClick then
+		local signalMaid = Maid.new()
+		maid._signal = signalMaid
+
 		local activated = button:WaitForChild("Activated") :: BindableEvent
-		self._Maid:GiveTask(activated.Event:Connect(function()
-			signal:Fire(path)
+		signalMaid:GiveTask(activated.Event:Connect(function()
+			buttonData.OnClick:Fire(buttonData.Path)
 		end))
 	end
-	maid:GiveTask(button)
+
 	maid:GiveTask(button.Destroying:Connect(function()
 		maid:Destroy()
 	end))
@@ -228,7 +222,6 @@ function Menu.new(): Menu
 	local _Computed = _fuse.Computed
 
 	self.Visible = _Value(true)
-
 	local BarHeight = _Computed(
 		function(textSize: number, padding: UDim)
 			return textSize + padding.Offset * 2
@@ -260,7 +253,7 @@ function Menu.new(): Menu
 		PseudoEnum.GuiDensityModifier.Default,
 		0,
 		"CurrencyFrame",
-		PseudoEnum.GuiColorPalette.Surface1,
+		PseudoEnum.GuiColorPalette.Surface5,
 		false
 	))({
 		Visible = self._CurrencyFrameVisible,
@@ -274,8 +267,8 @@ function Menu.new(): Menu
 			_library.Layout:GetContainer(
 				{
 					_library.Effect:GetUICorner() :: any,
-					_library.Layout:GetHorizontalList(PseudoEnum.GuiAlignmentType.Center, "High"),
-				self._ButtonFrame,
+					_library.Layout:GetHorizontalList(PseudoEnum.GuiAlignmentType.Bottom, "High"),
+					self._ButtonFrame,
 					self._CurrencyFrame,
 				},
 				nil,
@@ -297,7 +290,7 @@ function Menu.new(): Menu
 		PseudoEnum.GuiDensityModifier.High,
 		nil,
 		"Menu",
-		PseudoEnum.GuiColorPalette.Surface2,
+		PseudoEnum.GuiColorPalette.Surface6,
 		false
 	))({
 		AnchorPoint = _Computed(function(vis: boolean)
@@ -310,6 +303,7 @@ function Menu.new(): Menu
 		Position = _Computed(function(vis: boolean)
 			return UDim2.new(0.5, 0, 0, if vis then 0 else -TOP_BAR_INSET)
 		end, self.Visible):Tween(0.2),
+		ZIndex = 10,
 	}) :: Frame
 
 	return self

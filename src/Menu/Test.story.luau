@@ -19,36 +19,42 @@ return function(coreGui: ScreenGui)
 		local module = maid:GiveTask(Module.new())
 		module.Instance.Parent = coreGui
 		module:SetButton(
-			"home",
-			"home",
-			"where the heart is",
-			1
+			{
+				Path = "home",
+				Icon = "home",
+				Hint = "where the heart is",
+				LayoutOrder = 1,
+			}
 		)
 		module:SetButton(
-			"shop",
-			"shop",
-			"where the wallet is",
-			2
+			{
+				Path = "shop",
+				Icon = "shop",
+				Hint = "where the wallet is",
+				LayoutOrder = 2,
+			}
 		)
 		module:SetButton(
-			"up",
-			"accessibility",
-			"where the wallet is",
-			2
+			{
+				Path = "up",
+				Icon = "accessibility",
+				Hint = "where the wallet is",
+				LayoutOrder = 3,
+			}
 		)
 		module:SetCurrency(	
 			"db",
 			"Dollah dollah bills y'all",
-			nil,
+			"accessibility",
 			Color3.new(0,1, 0),
 			1,
 			0
 		)
-		task.delay(10, function()
-			module.Visible:Set(false)
-			task.wait(5)
-			module.Visible:Set(true)
-		end)
+		-- task.delay(10, function()
+		-- 	module.Visible:Set(false)
+		-- 	task.wait(5)
+		-- 	module.Visible:Set(true)
+		-- end)
 
 	end)
 

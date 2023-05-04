@@ -9,7 +9,7 @@ local Maid = require(Packages:WaitForChild("Maid"))
 local Signal = require(Packages:WaitForChild("Signal"))
 local ColdFusion = require(Packages:WaitForChild("ColdFusion"))
 local GuiLibrary = require(Packages:WaitForChild("GuiLibrary"))
-local StyleGuide = GuiLibrary:GetStyleGuide()
+local StyleGuide = GuiLibrary.getStyleGuide()
 
 -- Modules
 local PseudoEnum = require(Package:WaitForChild("PseudoEnum"))
@@ -150,7 +150,7 @@ function NotificationFrame.new(): NotificationFrame
 		BackgroundColor3 = StyleGuide:GetColor(PseudoEnum.GuiColorPalette.Secondary1),
 		BackgroundTransparency = 1,
 		BorderSizePixel = 0,
-		ZIndex = 1000,
+		ZIndex = 15,
 		Name = "NotificationFrame",
 		Children = {
 			_new("UIPadding")({

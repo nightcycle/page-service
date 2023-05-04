@@ -9,7 +9,7 @@ local Maid = require(Packages:WaitForChild("Maid"))
 local Signal = require(Packages:WaitForChild("Signal"))
 local ColdFusion = require(Packages:WaitForChild("ColdFusion"))
 local GuiLibrary = require(Packages:WaitForChild("GuiLibrary"))
-local StyleGuide = GuiLibrary:GetStyleGuide()
+local StyleGuide = GuiLibrary.getStyleGuide()
 
 -- Modules
 local PseudoEnum = require(Package:WaitForChild("PseudoEnum"))
@@ -173,10 +173,16 @@ function PromptFrame:Destroy()
 end
 
 function PromptFrame.new(): PromptFrame
-	local maid = Maid.new()
-	local _fuse = ColdFusion.fuse(maid)
+	local self: PromptFrame = setmetatable({}, PromptFrame) :: any
+	
+	self._Maid = Maid.new()
+	self._IsAlive = true
+	self._OpenItems = {}
+	self._Index = 0
+
+	local _fuse = ColdFusion.fuse(self._Maid)
 	local _new = _fuse.new
-	local _library = GuiLibrary.new(maid)
+	local _library = GuiLibrary.new(self._Maid)
 
 	local _bind = _fuse.bind
 	local _import = _fuse.import
@@ -184,26 +190,17 @@ function PromptFrame.new(): PromptFrame
 	local _Value = _fuse.Value
 	local _Computed = _fuse.Computed
 
-	local AnchorPoint = _Value(Vector2.new(0.5, 1))
-	local Size = _Value(UDim2.fromScale(0.35, 0.4))
-	local Position = _Value(UDim2.fromScale(0.5, 0.6))
-
-	local self: PromptFrame = setmetatable({}, PromptFrame) :: any
-	self._Maid = maid
-	self._IsAlive = true
-	self._OpenItems = {}
-	self._Index = 0
-	self.AnchorPoint = AnchorPoint
-	self.Size = Size
-	self.Position = Position
+	self.AnchorPoint = _Value(Vector2.new(0.5, 1))
+	self.Size = _Value(UDim2.fromScale(0.35, 0.4))
+	self.Position = _Value(UDim2.fromScale(0.5, 0.6))
 
 	self.Instance = _new("Frame")({
-		AnchorPoint = AnchorPoint,
-		Size = Size,
-		Position = Position,
+		AnchorPoint = self.AnchorPoint,
+		Size = self.Size,
+		Position = self.Position,
 		BackgroundTransparency = 1,
 		BorderSizePixel = 0,
-		ZIndex = 1000,
+		ZIndex = 15,
 		SizeConstraint = Enum.SizeConstraint.RelativeYY,
 		Name = "PromptFrame",
 		Children = {
