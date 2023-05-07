@@ -33,6 +33,7 @@ export type Canvas = {
 	_Maid: Maid,
 	_IsAlive: boolean,
 	_Pages: {[string]: Page},
+	Visible: ValueState<boolean>,
 	CurrentPage: ValueState<Page?>,
 	Instance: Frame,
 	RegisterPage: (
@@ -41,7 +42,7 @@ export type Canvas = {
 		constructor: Constructor,
 		isFullScreen: boolean
 	) -> nil,
-	Open: (self: Canvas, path: string, ...any) -> nil,
+	Open: (self: Canvas, path: string?, ...any?) -> nil,
 	Destroy: (self: Canvas) -> nil,
 	new: () -> Canvas,
 	init: (maid: Maid) -> nil
@@ -77,7 +78,7 @@ function Canvas:RegisterPage(
 	return nil
 end
 
-function Canvas:Open(path: string?, ...:any)
+function Canvas:Open(path: string?, ...:any?)
 	if not path then
 		path = "home"
 	end
@@ -113,11 +114,13 @@ function Canvas.new()
 	local _Computed = _fuse.Computed
 
 	local self: Canvas = setmetatable({}, Canvas) :: any
+	self.Visible = _Value(true)
 	self.CurrentPage = _Value(nil :: Page?)
 	self._IsAlive = true
 	self._Maid = maid
 	self._Pages = {}
 	self.Instance = _new("Frame")({
+		Visible = 	self.Visible,
 		Size = UDim2.fromScale(1,1),
 		Position = UDim2.fromScale(0.5,0.5),
 		AnchorPoint = Vector2.new(0.5,0.5),
