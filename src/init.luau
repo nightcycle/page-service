@@ -182,6 +182,7 @@ function Service.new(): PageService
 	self.VersionText = _Value("")
 	self.Instance = _new("ScreenGui")({
 		Name = "PageService",
+		ResetOnSpawn = false,
 		Children = {
 			self.Prompt.Instance,
 			self.Notification.Instance,
