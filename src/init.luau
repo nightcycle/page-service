@@ -183,6 +183,7 @@ function Service.new(): PageService
 	self.Instance = _new("ScreenGui")({
 		Name = "PageService",
 		ResetOnSpawn = false,
+		IgnoreGuiInset = true,
 		Children = {
 			self.Prompt.Instance,
 			self.Notification.Instance,
