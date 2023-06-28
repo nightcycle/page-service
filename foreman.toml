@@ -6,5 +6,5 @@ tarmac = 	{source = "Roblox/tarmac",			version = "0.7.0"}
 wally-package-types = {source = "JohnnyMorganz/wally-package-types", version = "1.2.0"}
 stylua = {source = "JohnnyMorganz/StyLua", version = "0.15.3"}
 wally-update = {source = "nightcycle/wally-update", version = "0.1.2"}
-style-guide = {source = "nightcycle/style-guide", version = "0.1.10"}
+style-guide = {source = "nightcycle/style-guide", version = "0.1.15"}
 pseudo-enum = {source = "nightcycle/pseudo-enum", version = "0.1.3"}
