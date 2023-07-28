@@ -2,11 +2,8 @@
 -- Services
 -- Packages
 local CanvasModule = script.Parent
-assert(CanvasModule)
 local Package = CanvasModule.Parent
-assert(Package)
 local Packages = Package.Parent
-assert(Packages ~= nil)
 local Maid = require(Packages:WaitForChild("Maid"))
 local ColdFusion = require(Packages:WaitForChild("ColdFusion"))
 local GuiLibrary = require(Packages:WaitForChild("GuiLibrary"))

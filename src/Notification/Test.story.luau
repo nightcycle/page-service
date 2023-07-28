@@ -1,10 +1,7 @@
 --!strict
 local ModuleInstance = script.Parent
-assert(ModuleInstance)
 local Package = ModuleInstance.Parent
-assert(Package)
 local Packages = Package.Parent
-assert(Packages ~= nil)
 local Maid = require(Packages:WaitForChild("Maid"))
 
 return function(coreGui: ScreenGui)

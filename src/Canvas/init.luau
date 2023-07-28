@@ -2,9 +2,7 @@
 -- Services
 -- Packages
 local Package = script.Parent
-assert(Package)
 local Packages = Package.Parent
-assert(Packages ~= nil)
 
 local Maid = require(Packages:WaitForChild("Maid"))
 local Signal = require(Packages:WaitForChild("Signal"))
