@@ -60,9 +60,6 @@ jobs:
  
       - name: install wally packages
         run: wally install   
- 
-      - name: generate pseudo-enum script
-        run: pseudo-enum build dev.project.json
 
       - name: generate sourcemap
         run: rojo sourcemap dev.project.json --output sourcemap.json
@@ -87,10 +84,6 @@ jobs:
           fi
           curl -L "https://gist.github.com/nightcycle/a57e04de443dfa89bd08c8eb001b03c6/raw" > "lints/lua51.yml"
           curl -L "https://gist.github.com/nightcycle/93c4b9af5bbf4ed09f39aa908dffccd0/raw" > "lints/luau.yml"
-
-      # apply code styling
-      - name: style src scripts
-        run: stylua src
 
       - name: style built scripts
         shell: bash

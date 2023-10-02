@@ -1,9 +1,6 @@
 {
   "name": "package",
   "tree": {
-    "$path": "src",
-    "PseudoEnum": {
-	"$path": "out/PseudoEnum.luau"
-    }
+    "$path": "src"
   }
 }
