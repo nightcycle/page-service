@@ -7,6 +7,8 @@ local Maid = require(_Packages:WaitForChild("Maid"))
 local ColdFusion = require(_Packages:WaitForChild("ColdFusion"))
 -- Modules
 local Config = require(_Package:WaitForChild("TopBar"):WaitForChild("Config"))
+local ToolTipConstructor = require(_Package:WaitForChild("TopBar"):WaitForChild("ToolTip"))
+
 -- Types
 -- Constants
 local BUTTON_HEIGHT = Config.BUTTON.HEIGHT
@@ -55,6 +57,10 @@ export type TopBarButton = {
 		Default: ValueState<number>,
 		Selection: ValueState<number?>,
 	},
+	ToolTip: {
+		Default: ValueState<string?>,
+		Selection: ValueState<string?>,
+	},
 	Instance: TextButton,
 	HighlightOnSelection: ValueState<boolean>,
 	ReplaceIconWithXOnSelection: ValueState<boolean>,
@@ -89,6 +95,9 @@ function TopBarButton.new()
 	self._IsAlive = true
 	self._Maid = Maid.new()
 
+	local toolTipMaid = Maid.new()
+	self._Maid:GiveTask(toolTipMaid)
+
 	local _fuse = ColdFusion.fuse(self._Maid)
 	
 	local _new = _fuse.new
@@ -118,6 +127,10 @@ function TopBarButton.new()
 		Default = _Value(1),
 		Selection = _Value(nil :: number?),
 	}
+	self.ToolTip = {
+		Default = _Value(nil :: string?),
+		Selection = _Value(nil :: string?),
+	}
 
 	self.ReplaceIconWithXOnSelection = _Value(false)
 	self.HighlightOnSelection = _Value(false)
@@ -134,6 +147,15 @@ function TopBarButton.new()
 			return "Default"
 		end
 	end, IsPressed, IsHovering, self.IsSelected)
+
+
+	local ToolTip = _Computed(function(buttonState: ButtonState, defTip: string?, selectionTip: string?)
+		if buttonState == "Selected" then
+			return selectionTip or defTip or ""
+		else
+			return defTip or ""
+		end
+	end, ButtonState, self.ToolTip.Default, self.ToolTip.Selection)
 	local IconScale = _Computed(function(
 		buttonState: ButtonState, 
 		defScale: number, 
@@ -389,10 +411,21 @@ function TopBarButton.new()
 			end,
 			MouseEnter = function()
 				IsHovering:Set(true)
+				if ToolTip:Get() ~= "" then
+					print("tip")
+					local pos = self.Instance.AbsolutePosition + self.Instance.AbsoluteSize * Vector2.new(0.5,1)
+					
+					toolTipMaid:GiveTask(ToolTipConstructor(
+						ToolTip, 
+						UDim2.fromOffset(pos.X, pos.Y)
+					))
+
+				end
 			end,
 			MouseLeave = function()
 				IsPressed:Set(false)
 				IsHovering:Set(false)
+				toolTipMaid:DoCleaning()
 			end,
 		}
 	}) :: TextButton

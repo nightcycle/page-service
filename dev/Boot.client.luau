@@ -49,6 +49,7 @@ end
 do
 	local button = topBarContainer:CreateButton()
 	button.Instance.LayoutOrder = 6
+	button.ToolTip.Default:Set("Insert tooltip here yay!")
 	button.IconScale.Default:Set(0.7)
 	button.IconImage.Default:Set("rbxassetid://9149338928")
 	button.IconImage.Selection:Set("rbxassetid://11560341132")

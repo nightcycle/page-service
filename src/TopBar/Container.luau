@@ -13,9 +13,7 @@ local TopBarButton = require(_Package:WaitForChild("TopBar"):WaitForChild("Butto
 -- Constants
 local BUTTON_PADDING = Config.BUTTON.PADDING
 local BUTTON_HEIGHT = Config.BUTTON.HEIGHT
-local BUTTON_BORDER = Config.BUTTON.BORDER
 local TOP_BAR_TOP_MARGIN = Config.MARGIN.TOP
-local PADDING = Config.PADDING
 local CONTAINER_BACKGROUND_COLOR = Config.THEME.BACKGROUND.UI.CONTRAST.COLOR
 local CONTAINER_BACKGROUND_TRANSPARENCY = Config.THEME.BACKGROUND.UI.CONTRAST.TRANSPARENCY
 local CLOSED_WIDTH = BUTTON_HEIGHT
@@ -112,7 +110,6 @@ function TopBarContainer:_UpdateClosedOffset()
 			offset += width
 		end
 	end
-	print(`anchorOffset: {offset}`)
 	if not self._UnlockButton then
 		offset *= 0.5
 	end
@@ -174,7 +171,6 @@ function TopBarContainer.new()
 	self._ClosedOffsetX = _Value(0)
 	local AnchorX = _Computed(function(openWidth: number, offsetX: number): number
 		local anchorX = offsetX/openWidth
-		print(`anchorX: {anchorX}`)
 		return anchorX
 	end, self._OpenWidth, self._ClosedOffsetX)
 	self._ListFrame = _new("Frame")({

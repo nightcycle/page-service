@@ -16,7 +16,6 @@ package-lock.json
 # File types
 *.lock
 *.gitconfig
-*.rbxl
 *.rbxlx
 *.lock
 
