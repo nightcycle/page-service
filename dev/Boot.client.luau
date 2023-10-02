@@ -28,47 +28,105 @@ local _import = _fuse.import
 local _Value = _fuse.Value
 local _Computed = _fuse.Computed
 
-local topBarContainer = PageService.TopBar:CreateContainer()
-
-local initialButton = topBarContainer:CreateButton()
-initialButton.Instance.LayoutOrder = 5
-initialButton.IconImage.Default:Set("http://www.roblox.com/asset/?id=11889177340")
-initialButton.IconScale.Selection:Set(1)
-initialButton.IconScale.Default:Set(0.7)
-
 do
-	local button = topBarContainer:CreateButton()
-	button.Instance.LayoutOrder = 3
-	button.IconScale.Default:Set(0.7)
-	button.IconImage.Default:Set("rbxassetid://10885637246")
-	button:SetOnClickInvoke(function()  
-		topBarContainer:ToggleExclusiveSelect(button)
-	end)
+	local topBarContainer = PageService.TopBar:CreateContainer()
+
+	local initialButton = topBarContainer:CreateButton()
+	initialButton.Instance.LayoutOrder = 9
+	initialButton.IconImage.Default:Set("http://www.roblox.com/asset/?id=11889177340")
+	initialButton.IconScale.Selection:Set(1)
+	initialButton.IconScale.Default:Set(0.7)
+	
+	do
+		local button = topBarContainer:CreateButton()
+		button.Instance.LayoutOrder = 3
+		button.IconScale.Default:Set(0.7)
+		button.IconImage.Default:Set("rbxassetid://10885637246")
+		button:SetOnClickInvoke(function()  
+			topBarContainer:ToggleExclusiveSelect(button)
+		end)
+	end
+	
+	do
+		local button = topBarContainer:CreateButton()
+		button.Instance.LayoutOrder = 6
+		button.ToolTip.Default:Set("A Tool-Tip!")
+		button.IconScale.Default:Set(0.7)
+		button.IconImage.Default:Set("rbxassetid://9149338928")
+		button.IconImage.Selection:Set("rbxassetid://11560341132")
+		button.IconScale.Selection:Set(0.6)
+	
+		button:SetOnClickInvoke(function()  
+			topBarContainer:ToggleExclusiveSelect(button)
+		end)
+	end
+	
+	
+	do
+		local button = topBarContainer:CreateButton()
+		button.Instance.LayoutOrder = 4
+		button.IconScale.Default:Set(0.7)
+		button.IconImage.Default:Set("rbxassetid://13732884875")
+		button:SetOnClickInvoke(function()  
+			topBarContainer:ToggleExclusiveSelect(button)
+		end)
+	end
+
+	
+	local midFrame = topBarContainer:CreateFrame(120)
+	midFrame.LayoutOrder = 5
+	midFrame.BackgroundTransparency = 0.5
+
+	topBarContainer:SetUnlockButton(initialButton)
+	topBarContainer.IsOpen:Set(false)
+
 end
 
 do
-	local button = topBarContainer:CreateButton()
-	button.Instance.LayoutOrder = 6
-	button.ToolTip.Default:Set("A Tool-Tip!")
-	button.IconScale.Default:Set(0.7)
-	button.IconImage.Default:Set("rbxassetid://9149338928")
-	button.IconImage.Selection:Set("rbxassetid://11560341132")
-	button.IconScale.Selection:Set(0.6)
+	local topBarContainer = PageService.TopBar:CreateContainer()
+	topBarContainer.Instance.LayoutOrder = 2
 
-	button:SetOnClickInvoke(function()  
-		topBarContainer:ToggleExclusiveSelect(button)
-	end)
+	-- local initialButton = topBarContainer:CreateButton()
+	-- initialButton.Instance.LayoutOrder = 5
+	-- initialButton.IconImage.Default:Set("http://www.roblox.com/asset/?id=11889177340")
+	-- initialButton.IconScale.Selection:Set(1)
+	-- initialButton.IconScale.Default:Set(0.7)
+	
+	do
+		local button = topBarContainer:CreateButton()
+		button.Instance.LayoutOrder = 3
+		button.IconScale.Default:Set(0.7)
+		button.IconImage.Default:Set("rbxassetid://10885637246")
+		button:SetOnClickInvoke(function()  
+			topBarContainer:ToggleExclusiveSelect(button)
+		end)
+	end
+	
+	-- do
+	-- 	local button = topBarContainer:CreateButton()
+	-- 	button.Instance.LayoutOrder = 6
+	-- 	button.ToolTip.Default:Set("A Tool-Tip!")
+	-- 	button.IconScale.Default:Set(0.7)
+	-- 	button.IconImage.Default:Set("rbxassetid://9149338928")
+	-- 	button.IconImage.Selection:Set("rbxassetid://11560341132")
+	-- 	button.IconScale.Selection:Set(0.6)
+	
+	-- 	button:SetOnClickInvoke(function()  
+	-- 		topBarContainer:ToggleExclusiveSelect(button)
+	-- 	end)
+	-- end
+	
+	
+	do
+		local button = topBarContainer:CreateButton()
+		button.Instance.LayoutOrder = 4
+		button.IconScale.Default:Set(0.7)
+		button.IconImage.Default:Set("rbxassetid://13732884875")
+		button:SetOnClickInvoke(function()  
+			topBarContainer:ToggleExclusiveSelect(button)
+		end)
+	end
+	-- topBarContainer:SetUnlockButton(initialButton)
+	topBarContainer.IsOpen:Set(true)
+	
 end
-
-
-do
-	local button = topBarContainer:CreateButton()
-	button.Instance.LayoutOrder = 4
-	button.IconScale.Default:Set(0.7)
-	button.IconImage.Default:Set("rbxassetid://13732884875")
-	button:SetOnClickInvoke(function()  
-		topBarContainer:ToggleExclusiveSelect(button)
-	end)
-end
-topBarContainer:SetUnlockButton(initialButton)
-topBarContainer.IsOpen:Set(false)

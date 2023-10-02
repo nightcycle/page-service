@@ -1,26 +1,17 @@
 --!strict
 local _Package = script.Parent.Parent
 local _Packages = _Package.Parent
+
 -- Services
+
 -- Packages
 local Maid = require(_Packages:WaitForChild("Maid"))
 local ColdFusion = require(_Packages:WaitForChild("ColdFusion"))
+
 -- Modules
 local Config = require(_Package:WaitForChild("TopBar"):WaitForChild("Config"))
 local TopBarButton = require(_Package:WaitForChild("TopBar"):WaitForChild("Button"))
 
--- Types
--- Constants
-local BUTTON_PADDING = Config.BUTTON.PADDING
-local BUTTON_HEIGHT = Config.BUTTON.HEIGHT
-local TOP_BAR_TOP_MARGIN = Config.MARGIN.TOP
-local CONTAINER_BACKGROUND_COLOR = Config.THEME.BACKGROUND.UI.CONTRAST.COLOR
-local CONTAINER_BACKGROUND_TRANSPARENCY = Config.THEME.BACKGROUND.UI.CONTRAST.TRANSPARENCY
-local CLOSED_WIDTH = BUTTON_HEIGHT
--- Variables
--- References
--- Private Functions
--- Class
 -- Types
 type Maid = Maid.Maid
 type State<V> = ColdFusion.State<V>
@@ -31,14 +22,18 @@ export type TopBarContainer = {
 	_Maid: Maid,
 	_IsAlive: boolean,
 	_Buttons: {[number]: TopBarButton},
+	_Frames: {[number]: Frame},
+	_GuiWidths: {[GuiObject]: number},
 	_UnlockButton: TopBarButton?,
 	Instance: Frame,
 	_ListFrame: Frame,
 	IsOpen: ValueState<boolean>,
 	_ClosedOffsetX: ValueState<number>,
 	_OpenWidth: ValueState<number>,
+	CreateFrame: (self: TopBarContainer, width: number) -> Frame,
 	CreateButton: (self: TopBarContainer) -> TopBarButton,
 	GetButtons: (self: TopBarContainer) -> {[number]: TopBarButton},
+	GetFrames: (self: TopBarContainer) -> {[number]: Frame},
 	SetUnlockButton: (self: TopBarContainer, topBarButton: TopBarButton?) -> (),
 	GetUnlockButton: (self: TopBarContainer) -> TopBarButton?,
 	ToggleExclusiveSelect: (self: TopBarContainer, button: TopBarButton?) -> (), 
@@ -46,6 +41,16 @@ export type TopBarContainer = {
 	Destroy: (self: TopBarContainer) -> (),
 	new: () -> TopBarContainer,
 }
+-- Constants
+local BUTTON_PADDING = Config.BUTTON.PADDING
+local BUTTON_HEIGHT = Config.BUTTON.HEIGHT
+local TOP_BAR_TOP_MARGIN = Config.MARGIN.TOP
+local CONTAINER_BACKGROUND_COLOR = Config.THEME.BACKGROUND.UI.CONTRAST.COLOR
+local CONTAINER_BACKGROUND_TRANSPARENCY = Config.THEME.BACKGROUND.UI.CONTRAST.TRANSPARENCY
+local CLOSED_WIDTH = BUTTON_HEIGHT
+-- Variables
+-- References
+-- Private Functions
 
 -- Class
 local TopBarContainer = {} :: TopBarContainer
@@ -64,7 +69,10 @@ end
 
 function TopBarContainer:CreateButton(): TopBarButton
 	local button = self._Maid:GiveTask(TopBarButton.new())
+	self._GuiWidths[button.Instance] = BUTTON_HEIGHT + BUTTON_PADDING
+
 	self._OpenWidth:Set(self._OpenWidth:Get() + BUTTON_HEIGHT + BUTTON_PADDING)
+
 	self._Maid:GiveTask(button.Instance:GetPropertyChangedSignal("Visible"):Connect(function(...: any)
 		if button.Instance.Visible then
 			self._OpenWidth:Set(self._OpenWidth:Get() + BUTTON_HEIGHT + BUTTON_PADDING)
@@ -72,13 +80,49 @@ function TopBarContainer:CreateButton(): TopBarButton
 			self._OpenWidth:Set(self._OpenWidth:Get() - BUTTON_HEIGHT - BUTTON_PADDING)
 		end
 	end))
+
 	self._Maid:GiveTask(button.Instance:GetPropertyChangedSignal("LayoutOrder"):Connect(function(...: any)
 		self:_UpdateClosedOffset()
 	end))
+
 	button.Instance.Parent = self._ListFrame
 	table.insert(self._Buttons, button)
 	self:_UpdateClosedOffset()
 	return button
+end
+
+function TopBarContainer:GetFrames(): {[number]: Frame}
+	return table.clone(self._Frames)
+end
+
+function TopBarContainer:CreateFrame(width: number): Frame
+	
+	local frame = self._Maid:GiveTask(Instance.new("Frame"))
+	frame.Size = UDim2.fromOffset(width, BUTTON_HEIGHT)
+	frame.Transparency = 1
+	frame.Parent = self._ListFrame
+
+	self._GuiWidths[frame] = width
+
+	self._OpenWidth:Set(self._OpenWidth:Get() + width)
+
+	self._Maid:GiveTask(frame:GetPropertyChangedSignal("Visible"):Connect(function(...: any)
+		if frame.Visible then
+			self._OpenWidth:Set(self._OpenWidth:Get() + width)
+		else
+			self._OpenWidth:Set(self._OpenWidth:Get() - width)
+		end
+		self:_UpdateClosedOffset()
+	end))
+
+	self._Maid:GiveTask(frame:GetPropertyChangedSignal("LayoutOrder"):Connect(function(...: any)
+		self:_UpdateClosedOffset()
+	end))
+	table.insert(self._Frames, frame)
+
+	self:_UpdateClosedOffset()
+
+	return frame
 end
 
 function TopBarContainer:ToggleExclusiveSelect(button: TopBarButton?): ()
@@ -96,18 +140,36 @@ function TopBarContainer:ToggleExclusiveSelect(button: TopBarButton?): ()
 end
 
 function TopBarContainer:_UpdateClosedOffset()
-	local buttons = self:GetButtons()
-	table.sort(buttons, function(a: TopBarButton, b: TopBarButton): boolean
-		return a.Instance.AbsolutePosition.X < b.Instance.AbsolutePosition.X
-	end)
+	-- table.sort(buttons, function(a: TopBarButton, b: TopBarButton): boolean
+	-- 	return a.Instance.AbsolutePosition.X < b.Instance.AbsolutePosition.X
+	-- end)
+	local buttonRegistry: {[GuiObject]: TopBarButton} = {}
+	for i, button in ipairs(self:GetButtons()) do
+		buttonRegistry[button.Instance] = button
+	end
 	local offset = -BUTTON_PADDING*0.5
-	for i, button in ipairs(buttons) do
-		local width = BUTTON_HEIGHT + BUTTON_PADDING
-		if button == self._UnlockButton then
-			offset += width * 0.5
-			break
+	local guiObjects = self._ListFrame:GetChildren()
+	table.sort(guiObjects, function(a: Instance, b: Instance): boolean
+		if a:IsA("GuiObject") and b:IsA("GuiObject") then
+			return a.AbsolutePosition.X < b.AbsolutePosition.X
+		elseif a:IsA("GuiObject") then
+			return true
+		elseif b:IsA("GuiObject") then
+			return false
 		else
-			offset += width
+			return false
+		end
+	end)
+	for i, guiObject in ipairs(guiObjects) do
+		if guiObject:IsA("GuiObject") then
+			local width = self._GuiWidths[guiObject] -- BUTTON_HEIGHT + BUTTON_PADDING
+			local button = buttonRegistry[guiObject]
+			if self._UnlockButton and button and button == self._UnlockButton then
+				offset += width * 0.5
+				break
+			elseif width then
+				offset += width
+			end
 		end
 	end
 	if not self._UnlockButton then
@@ -166,7 +228,8 @@ function TopBarContainer.new()
 			end
 		end
 	end))
-
+	self._Frames = {}
+	self._GuiWidths = {}
 	self._OpenWidth = _Value(-BUTTON_PADDING)
 	self._ClosedOffsetX = _Value(0)
 	local AnchorX = _Computed(function(openWidth: number, offsetX: number): number

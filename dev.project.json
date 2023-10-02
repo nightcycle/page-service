@@ -7,10 +7,7 @@
 	    "Packages": {
 		 "$path": "Packages",
 		 "package": {
-		   "$path": "src",
-		   "PseudoEnum": {
-			"$path": "out/PseudoEnum.luau"
-		   }
+		   "$path": "src"
 		 }
 	    }
 	  },

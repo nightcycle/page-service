@@ -82,6 +82,7 @@ return function(
 		DisplayOrder = 20,
 		IgnoreGuiInset = true,
 		Enabled = true,
+		ResetOnSpawn = false,
 		Parent = if Player then Player:WaitForChild("PlayerGui") else game:GetService("CoreGui"),
 		Children = {
 			_new("CanvasGroup")({

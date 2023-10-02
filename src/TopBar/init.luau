@@ -44,10 +44,11 @@ export type TopBar = {
 	_IsAlive: boolean,
 	_Frame: Frame,
 	_Containers: {[number]: TopBarContainer},
+	Instance: ScreenGui,
+	IsOpen: ValueState<boolean>,
 	AlignUsingMinimumFootprint: ValueState<boolean>,
 	CreateContainer: (self: TopBar) -> TopBarContainer,
 	GetContainers: (self: TopBar) -> {[number]: TopBarContainer},
-	Instance: ScreenGui,
 	Destroy: (self: TopBar) -> (),
 	new: () -> TopBar,
 }
@@ -126,10 +127,13 @@ function TopBar.new()
 	local AbsoluteWidth = _Value(self._Frame.AbsoluteSize.X)
 	local ScreenWidth = _Value(workspace.CurrentCamera.ViewportSize.X)
 
+	self.IsOpen = _Value(true)
 	self.Instance = _new("ScreenGui")({
 		Name = "TopBar",
 		IgnoreGuiInset = true,
 		ClipToDeviceSafeArea = true,
+		Enabled = self.IsOpen,
+		ResetOnSpawn = false,
 		SafeAreaCompatibility = Enum.SafeAreaCompatibility.FullscreenExtension,
 		ScreenInsets = Enum.ScreenInsets.CoreUISafeInsets,
 		Parent = if Player then Player:WaitForChild("PlayerGui") else game:GetService("CoreGui"),
