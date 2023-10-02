@@ -413,7 +413,7 @@ function TopBarButton.new()
 				IsHovering:Set(true)
 				if ToolTip:Get() ~= "" then
 					print("tip")
-					local pos = self.Instance.AbsolutePosition + self.Instance.AbsoluteSize * Vector2.new(0.5,1)
+					local pos = self.Instance.AbsolutePosition + self.Instance.AbsoluteSize * Vector2.new(0.5,0) + Vector2.new(0,BUTTON_HEIGHT)
 					
 					toolTipMaid:GiveTask(ToolTipConstructor(
 						ToolTip, 
