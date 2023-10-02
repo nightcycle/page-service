@@ -5,6 +5,8 @@ local _Packages = _Package.Parent
 
 -- Services
 local Players = game:GetService("Players")
+local StarterGui = game:GetService("StarterGui")
+local RunService = game:GetService("RunService")
 
 -- Packages
 local Maid = require(_Packages:WaitForChild("Maid"))
@@ -19,8 +21,12 @@ local Container = require(script:WaitForChild("Container"))
 local TOP_BAR_HEIGHT = Config.HEIGHT
 local TOP_BAR_MARGIN = Config.MARGIN.TOP
 local TOP_BUTTON_PADDING = Config.BUTTON.PADDING
-
+local TOP_BUTTON_HEIGHT = Config.BUTTON.HEIGHT
+local TOP_BUTTON_BORDER = Config.BUTTON.BORDER
+local UNIBAR_DIVIDER_WIDTH = Config.UNIBAR.DIVIDER_CELL_WIDTH
+local UNIBAR_CELL_WIDTH = Config.UNIBAR.ICON_CELL_WIDTH
 local PADDING = Config.PADDING
+local HEALTH_BAR_WIDTH = 80
 
 -- Variables
 -- References
@@ -38,6 +44,7 @@ export type TopBar = {
 	_IsAlive: boolean,
 	_Frame: Frame,
 	_Containers: {[number]: TopBarContainer},
+	AlignUsingMinimumFootprint: ValueState<boolean>,
 	CreateContainer: (self: TopBar) -> TopBarContainer,
 	GetContainers: (self: TopBar) -> {[number]: TopBarContainer},
 	Instance: ScreenGui,
@@ -91,13 +98,18 @@ function TopBar.new()
 	local _Value = _fuse.Value
 	local _Computed = _fuse.Computed
 
+	local LeftMargin = _Value(0)
+	local RightMargin = _Value(0)
+
+	self.AlignUsingMinimumFootprint = _Value(true)
 	self._Containers = {}
 	self._Frame = _new("Frame")({
-		Name = "TopBarFrame",
+		Name = "ContainerFrame",
 		BackgroundTransparency = 1,
-		Position = UDim2.new(0.5,0,0,TOP_BAR_MARGIN),
-		AnchorPoint = Vector2.new(0.5,0),
-		Size = UDim2.new(1, 0, 0, TOP_BAR_HEIGHT),
+		AutomaticSize = Enum.AutomaticSize.X,
+		Position = UDim2.fromScale(1,0.5),
+		AnchorPoint = Vector2.new(1,0.5),
+		Size = UDim2.fromScale(0,1),
 		Children = {
 			_new("UIPadding")({
 				PaddingTop = UDim.new(0, TOP_BUTTON_PADDING),
@@ -111,6 +123,8 @@ function TopBar.new()
 			}),
 		}
 	}) :: Frame
+	local AbsoluteWidth = _Value(self._Frame.AbsoluteSize.X)
+	local ScreenWidth = _Value(workspace.CurrentCamera.ViewportSize.X)
 
 	self.Instance = _new("ScreenGui")({
 		Name = "TopBar",
@@ -121,10 +135,65 @@ function TopBar.new()
 		Parent = if Player then Player:WaitForChild("PlayerGui") else game:GetService("CoreGui"),
 		DisplayOrder = 7,
 		Children = {
-			self._Frame,
+			_new("Frame")({
+				Name = "TopBarFrame",
+				BackgroundTransparency = 1,
+				Position = _Computed(function(left: number, right: number, containerWidth: number, screenWidth: number): UDim2
+					if (0.5*screenWidth - math.max(right, left)) > containerWidth * 0.5 then
+						return UDim2.new(0.5, 0, 0, TOP_BAR_MARGIN)
+					else
+						if left > right then
+							return UDim2.new(0, left + containerWidth * 0.5, 0, TOP_BAR_MARGIN)
+						else
+							return UDim2.new(1, -right - containerWidth * 0.5, 0, TOP_BAR_MARGIN)
+						end
+					end
+				end, LeftMargin, RightMargin, AbsoluteWidth, ScreenWidth),
+				AnchorPoint = Vector2.new(0.5,0),
+				Size = _Computed(function(containerWidth: number, screenWidth: number): UDim2
+					return UDim2.new(0, containerWidth, 0, TOP_BAR_HEIGHT)
+				end, AbsoluteWidth, ScreenWidth),
+				Children = {
+					self._Frame
+				}
+			}) :: Frame
 		}
 	}) :: ScreenGui
 
+	self._Maid:GiveTask(RunService.PreRender:Connect(function(deltaTime: number)
+		local rightOffset = TOP_BAR_MARGIN + TOP_BUTTON_BORDER + TOP_BUTTON_PADDING * 0.5
+		local buttonWidth = UNIBAR_CELL_WIDTH
+		local leftOffset = rightOffset + TOP_BUTTON_PADDING + TOP_BUTTON_HEIGHT
+		if not self.AlignUsingMinimumFootprint:Get() then
+			rightOffset += buttonWidth * 3
+			rightOffset += UNIBAR_DIVIDER_WIDTH + TOP_BUTTON_PADDING * 2
+			if StarterGui:GetCoreGuiEnabled(Enum.CoreGuiType.Backpack) then
+				rightOffset += buttonWidth
+			end
+			if StarterGui:GetCoreGuiEnabled(Enum.CoreGuiType.Chat) then
+				rightOffset += buttonWidth
+			end
+			if StarterGui:GetCoreGuiEnabled(Enum.CoreGuiType.EmotesMenu) then
+				rightOffset += buttonWidth
+			end
+			if StarterGui:GetCoreGuiEnabled(Enum.CoreGuiType.Health) then
+				rightOffset += HEALTH_BAR_WIDTH + PADDING
+			end
+			if StarterGui:GetCoreGuiEnabled(Enum.CoreGuiType.PlayerList) then
+				rightOffset += buttonWidth
+			end
+			if StarterGui:GetCoreGuiEnabled(Enum.CoreGuiType.SelfView) then
+				-- rightOffset += buttonWidth
+			end
+		else
+			rightOffset = leftOffset
+		end
+		
+		AbsoluteWidth:Set(self._Frame.AbsoluteSize.X)
+		ScreenWidth:Set(workspace.CurrentCamera.ViewportSize.X)
+		LeftMargin:Set(leftOffset + PADDING)
+		RightMargin:Set(rightOffset + PADDING)
+	end))
 
 	-- I don't know why, but it'll just set itself to false sometimes
 	local function forceIgnoreGuiInset()
