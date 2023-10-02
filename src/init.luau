@@ -5,10 +5,8 @@ local _Packages = _Package.Parent
 -- Packages
 
 local Maid = require(_Packages:WaitForChild("Maid"))
-local Signal = require(_Packages:WaitForChild("Signal"))
 local ColdFusion = require(_Packages:WaitForChild("ColdFusion"))
 local ServiceProxy = require(_Packages:WaitForChild("ServiceProxy"))
-local GuiLibrary = require(_Packages:WaitForChild("GuiLibrary"))
 
 -- Modules
 local TopBar = require(_Package:WaitForChild("TopBar"))
@@ -16,20 +14,16 @@ local TopBar = require(_Package:WaitForChild("TopBar"))
 
 -- Types
 type Maid = Maid.Maid
-type Signal = Signal.Signal
 type Fuse = ColdFusion.Fuse
 type ValueState<T> = ColdFusion.ValueState<T>
 type State<T> = ColdFusion.State<T>
 type ParameterValue<T> = (State<T> | T)
 type TopBar = TopBar.TopBar
-export type StyleGuide = GuiLibrary.StyleGuide
 export type PageService = {
 	__index: PageService,
 	_IsAlive: boolean,
 	_Maid: Maid,
 	TopBar: TopBar,
-	SetStyleGuide: (self: PageService, styleGuide: StyleGuide) -> nil,
-	GetStyleGuide: (self: PageService) -> StyleGuide,
 	Destroy: (self: PageService) -> nil,
 	new: (parent: GuiObject?) -> PageService,
 	init: (maid: Maid) -> nil,
@@ -59,15 +53,6 @@ function Service:Destroy(): nil
 	return nil
 end
 
-function Service:SetStyleGuide(styleGuide: StyleGuide): nil
-	GuiLibrary.setStyleGuide(styleGuide)
-	return nil
-end
-
-function Service:GetStyleGuide(): StyleGuide
-	return GuiLibrary.getStyleGuide()
-end
-
 function Service.new(): PageService
 	local self: PageService = setmetatable({}, Service) :: any
 	self._IsAlive = true
@@ -79,7 +64,6 @@ function Service.new(): PageService
 
 	-- fusion workspace
 	local _fuse = ColdFusion.fuse(self._Maid)
-	local _library = GuiLibrary.new(self._Maid)
 
 	local _new = _fuse.new
 	local _bind = _fuse.bind
@@ -100,7 +84,6 @@ end
 
 function Service.init(maid: Maid)
 	if currentService == nil then
-		GuiLibrary.init(maid)
 		maid:GiveTask(Service.new())
 	end
 	return nil
