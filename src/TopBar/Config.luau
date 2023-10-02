@@ -71,10 +71,6 @@ local THEME_COLORS = {
 	SMOKE = Color3.fromRGB(96, 97, 98),
 	XBOX_BLUE = Color3.fromRGB(17, 139, 211),
 }
---[[
-	Implementation of the Unified Color System.
-	See: https://www.figma.com/file/afPf1YESNBS6BWiyzgPdlM/Color-System-(Core)?node-id=945%3A1
- ]]
 
 -- Variables
 -- References
@@ -382,11 +378,11 @@ return {
 	BUTTON = {
 		HEIGHT = TOP_BAR_BUTTON_HEIGHT,
 		PADDING = TOP_BAR_BUTTON_PADDING,
+		BORDER = 4,
 	},
 	MARGIN = {
 		TOP = TOP_BAR_HEIGHT - TOP_BAR_BUTTON_HEIGHT - 2 * TOP_BAR_BUTTON_PADDING,
 	},
 	SCREEN_SIDE_OFFSET = if IS_TEN_FOOT_MODE then 48 else 16,
 	PADDING = 12,
-
 }

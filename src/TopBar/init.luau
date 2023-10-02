@@ -12,17 +12,15 @@ local ColdFusion = require(_Packages:WaitForChild("ColdFusion"))
 
 -- Modules
 local Config = require(script:WaitForChild("Config"))
+local Container = require(script:WaitForChild("Container"))
 
 -- Types
 -- Constants
 local TOP_BAR_HEIGHT = Config.HEIGHT
-local TOP_BUTTON_HEIGHT = Config.BUTTON.HEIGHT
+local TOP_BAR_MARGIN = Config.MARGIN.TOP
 local TOP_BUTTON_PADDING = Config.BUTTON.PADDING
 
-local TOP_BAR_TOP_MARGIN = Config.MARGIN.TOP
 local PADDING = Config.PADDING
-local CONTAINER_BACKGROUND_COLOR = Config.THEME.BACKGROUND.UI.CONTRAST.COLOR
-local CONTAINER_BACKGROUND_TRANSPARENCY = Config.THEME.BACKGROUND.UI.CONTRAST.TRANSPARENCY
 
 -- Variables
 -- References
@@ -33,10 +31,15 @@ local Player = Players.LocalPlayer
 type Maid = Maid.Maid
 type ValueState<T> = ColdFusion.ValueState<T>
 type State<T> = ColdFusion.State<T>
+export type TopBarContainer = Container.TopBarContainer
 export type TopBar = {
 	__index: TopBar,
 	_Maid: Maid,
 	_IsAlive: boolean,
+	_Frame: Frame,
+	_Containers: {[number]: TopBarContainer},
+	CreateContainer: (self: TopBar) -> TopBarContainer,
+	GetContainers: (self: TopBar) -> {[number]: TopBarContainer},
 	Instance: ScreenGui,
 	Destroy: (self: TopBar) -> (),
 	new: () -> TopBar,
@@ -61,6 +64,17 @@ function TopBar:Destroy()
 	setmetatable(t, nil)
 end
 
+function TopBar:GetContainers(): {[number]: TopBarContainer}
+	return table.clone(self._Containers)
+end
+
+function TopBar:CreateContainer(): TopBarContainer
+	local container = self._Maid:GiveTask(Container.new())
+	table.insert(self._Containers, container)
+	container.Instance.Parent = self._Frame
+	return container
+end
+
 function TopBar.new()
 
 	local self: TopBar = setmetatable({}, TopBar) :: any
@@ -77,6 +91,27 @@ function TopBar.new()
 	local _Value = _fuse.Value
 	local _Computed = _fuse.Computed
 
+	self._Containers = {}
+	self._Frame = _new("Frame")({
+		Name = "TopBarFrame",
+		BackgroundTransparency = 1,
+		Position = UDim2.new(0.5,0,0,TOP_BAR_MARGIN),
+		AnchorPoint = Vector2.new(0.5,0),
+		Size = UDim2.new(1, 0, 0, TOP_BAR_HEIGHT),
+		Children = {
+			_new("UIPadding")({
+				PaddingTop = UDim.new(0, TOP_BUTTON_PADDING),
+			}),
+			_new("UIListLayout")({
+				Padding = UDim.new(0,PADDING),
+				FillDirection = Enum.FillDirection.Horizontal,
+				HorizontalAlignment = Enum.HorizontalAlignment.Center,
+				SortOrder = Enum.SortOrder.LayoutOrder,
+				VerticalAlignment = Enum.VerticalAlignment.Top,
+			}),
+		}
+	}) :: Frame
+
 	self.Instance = _new("ScreenGui")({
 		Name = "TopBar",
 		IgnoreGuiInset = true,
@@ -86,32 +121,19 @@ function TopBar.new()
 		Parent = if Player then Player:WaitForChild("PlayerGui") else game:GetService("CoreGui"),
 		DisplayOrder = 7,
 		Children = {
-			_new("Frame")({
-				Name = "Container",
-				BackgroundColor3 = CONTAINER_BACKGROUND_COLOR,
-				BackgroundTransparency = CONTAINER_BACKGROUND_TRANSPARENCY,
-				Size = UDim2.new(0.5, 0, 0, TOP_BUTTON_HEIGHT),
-				Position = UDim2.new(0.5, 0, 0, TOP_BAR_TOP_MARGIN+TOP_BUTTON_PADDING),
-				AnchorPoint = Vector2.new(0.5, 0),
-				Children = {
-					_new("UICorner")({
-						CornerRadius = UDim.new(1, 0),
-					}),
-					_new("UIPadding")({
-						PaddingBottom = UDim.new(0,2),
-						PaddingTop = UDim.new(0,2),
-					}),
-					_new("UIListLayout")({
-						Padding = UDim.new(0, PADDING),
-						FillDirection = Enum.FillDirection.Horizontal,
-						HorizontalAlignment = Enum.HorizontalAlignment.Right,
-						SortOrder = Enum.SortOrder.LayoutOrder,
-						VerticalAlignment = Enum.VerticalAlignment.Top,
-					}),
-				}
-			})
+			self._Frame,
 		}
 	}) :: ScreenGui
+
+
+	-- I don't know why, but it'll just set itself to false sometimes
+	local function forceIgnoreGuiInset()
+		if not self.Instance.IgnoreGuiInset then
+			self.Instance.IgnoreGuiInset = true
+		end
+	end
+	self._Maid:GiveTask(self.Instance:GetPropertyChangedSignal("IgnoreGuiInset"):Connect(forceIgnoreGuiInset))
+	forceIgnoreGuiInset()
 
 	if CurrentTopBar ~= nil then
 		 CurrentTopBar:Destroy()
