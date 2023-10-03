@@ -197,6 +197,12 @@ function TopBarContainer:_UpdateClosedOffset()
 		if guiObject:IsA("GuiObject") then
 			local width = self._GuiWidths[guiObject] -- BUTTON_HEIGHT + BUTTON_PADDING
 			local button = buttonRegistry[guiObject]
+			if button and button.IsEnabled:Get() then
+				width *= 0
+			end
+			if guiObject.Visible == false then
+				width *= 0
+			end
 			if self._UnlockButton and button and button == self._UnlockButton then
 				offset += width * 0.5
 				break
