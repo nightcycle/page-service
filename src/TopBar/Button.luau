@@ -65,6 +65,7 @@ export type TopBarButton = {
 	HighlightOnSelection: ValueState<boolean>,
 	ReplaceIconWithXOnSelection: ValueState<boolean>,
 	IsSelected: ValueState<boolean>,
+	IsEnabled: ValueState<boolean>,
 	SetOnClickInvoke: (self: TopBarButton, onInvoke: OnClickInvoke) -> (),
 	Destroy: (self: TopBarButton) -> (),
 	new: () -> TopBarButton,
@@ -135,6 +136,7 @@ function TopBarButton.new()
 	self.ReplaceIconWithXOnSelection = _Value(false)
 	self.HighlightOnSelection = _Value(false)
 	self.IsSelected = _Value(false)
+	self.IsEnabled = _Value(true)
 	self._OnClickInvoke = function()
 		self.IsSelected:Set(not self.IsSelected:Get())
 	end
@@ -237,9 +239,22 @@ function TopBarButton.new()
 	}) :: ImageLabel
 
 	self.Instance = _new("TextButton")({
-		Size = UDim2.fromOffset(
-			BUTTON_HEIGHT,
-			BUTTON_HEIGHT
+		Size = _Computed(function(isEnabled: boolean): UDim2
+			if isEnabled then
+				return UDim2.fromOffset(
+					BUTTON_HEIGHT,
+					BUTTON_HEIGHT
+				)
+			else
+				return UDim2.fromOffset(
+					0,
+					BUTTON_HEIGHT
+				)
+			end
+		end, self.IsEnabled):Tween(
+			0.25,
+			Enum.EasingStyle.Cubic,
+			Enum.EasingDirection.Out
 		),
 		BackgroundTransparency = 1,
 		Children = {
@@ -249,7 +264,14 @@ function TopBarButton.new()
 				PaddingRight = UDim.new(0,BUTTON_BORDER),
 				PaddingLeft = UDim.new(0,BUTTON_BORDER),
 			}),
-			_new("Frame")({
+			_new("CanvasGroup")({
+				GroupTransparency = _Computed(function(isEnabled: boolean): number
+					return if isEnabled then 0 else 1
+				end, self.IsEnabled):Tween(
+					0.25,
+					Enum.EasingStyle.Cubic,
+					Enum.EasingDirection.Out
+				),
 				BackgroundTransparency = _Computed(function(buttonState: ButtonState, highlightOnSelection: boolean): number
 					if buttonState == "Pressed" then
 						return BUTTON_PRESS_TRANSPARENCY

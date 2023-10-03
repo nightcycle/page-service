@@ -27,7 +27,7 @@ export type TopBarContainer = {
 	_UnlockButton: TopBarButton?,
 	Instance: Frame,
 	_ListFrame: Frame,
-	IsOpen: ValueState<boolean>,
+	IsEnabled: ValueState<boolean>,
 	_ClosedOffsetX: ValueState<number>,
 	_OpenWidth: ValueState<number>,
 	CreateFrame: (self: TopBarContainer, width: number) -> Frame,
@@ -207,12 +207,12 @@ function TopBarContainer:SetUnlockButton(button: TopBarButton?): ()
 		button.ReplaceIconWithXOnSelection:Set(true)
 		button.HighlightOnSelection:Set(true)
 		self._Maid._unlockSelection = button.IsSelected:Connect(function()
-			self.IsOpen:Set(button.IsSelected:Get())
+			self.IsEnabled:Set(button.IsSelected:Get())
 		end)
-		self._Maid._topDownUnlockSelection = self.IsOpen:Connect(function()
-			button.IsSelected:Set(self.IsOpen:Get())
+		self._Maid._topDownUnlockSelection = self.IsEnabled:Connect(function()
+			button.IsSelected:Set(self.IsEnabled:Get())
 		end)
-		button.IsSelected:Set(self.IsOpen:Get())
+		button.IsSelected:Set(self.IsEnabled:Get())
 		self:_UpdateClosedOffset()
 	end
 end
@@ -239,10 +239,10 @@ function TopBarContainer.new()
 	local _Value = _fuse.Value
 	local _Computed = _fuse.Computed
 
-	self.IsOpen = _Value(false)
+	self.IsEnabled = _Value(false)
 
-	self._Maid:GiveTask(self.IsOpen:Connect(function()
-		if self.IsOpen:Get() == false then
+	self._Maid:GiveTask(self.IsEnabled:Connect(function()
+		if self.IsEnabled:Get() == false then
 			for i, v in ipairs(self:GetButtons()) do
 				v.IsSelected:Set(false)
 			end
@@ -268,7 +268,7 @@ function TopBarContainer.new()
 		),
 		Position =_Computed(function(anchorX: number, isOpen: boolean): UDim2
 			return UDim2.fromScale(if not isOpen then 0.5 else anchorX, 0)
-		end, AnchorX, self.IsOpen):Tween(
+		end, AnchorX, self.IsEnabled):Tween(
 			0.1,
 			Enum.EasingStyle.Quad,
 			Enum.EasingDirection.In
@@ -292,13 +292,20 @@ function TopBarContainer.new()
 			}),
 		}
 	}) :: Frame
-	self.Instance = _new("Frame")({
+	self.Instance = _new("CanvasGroup")({
 		Name = "TopBarContainer",
 		BackgroundColor3 = CONTAINER_BACKGROUND_COLOR,
 		BackgroundTransparency = CONTAINER_BACKGROUND_TRANSPARENCY,
-		Size = _Computed(function(isOpen: boolean, openWidth: number): UDim2
-			return UDim2.new(0, if isOpen then openWidth else CLOSED_WIDTH, 0, BUTTON_HEIGHT)
-		end, self.IsOpen, self._OpenWidth):Tween(
+		GroupTransparency = _Computed(function(isEnabled: boolean): number
+			return if isEnabled then 0 else 1
+		end, self.IsEnabled):Tween(
+			0.1,
+			Enum.EasingStyle.Cubic,
+			Enum.EasingDirection.Out
+		),
+		Size = _Computed(function(isEnabled: boolean, openWidth: number): UDim2
+			return UDim2.new(0, if isEnabled then openWidth else CLOSED_WIDTH, 0, BUTTON_HEIGHT)
+		end, self.IsEnabled, self._OpenWidth):Tween(
 			0.1,
 			Enum.EasingStyle.Quad,
 			Enum.EasingDirection.In

@@ -46,7 +46,7 @@ export type TopBar = {
 	_Frame: Frame,
 	_Containers: {[number]: TopBarContainer},
 	Instance: ScreenGui,
-	IsOpen: ValueState<boolean>,
+	IsEnabled: ValueState<boolean>,
 	AlignUsingMinimumFootprint: ValueState<boolean>,
 	CreateContainer: (self: TopBar) -> TopBarContainer,
 	GetContainers: (self: TopBar) -> {[number]: TopBarContainer},
@@ -138,21 +138,29 @@ function TopBar.new()
 	local AbsoluteWidth = _Value(self._Frame.AbsoluteSize.X)
 	local ScreenWidth = _Value(workspace.CurrentCamera.ViewportSize.X)
 
-	self.IsOpen = _Value(true)
+	self.IsEnabled = _Value(true)
+
 	self.Instance = _new("ScreenGui")({
 		Name = "TopBar",
 		IgnoreGuiInset = true,
 		ClipToDeviceSafeArea = true,
-		Enabled = self.IsOpen,
+		Enabled = self.IsEnabled,
 		ResetOnSpawn = false,
 		SafeAreaCompatibility = Enum.SafeAreaCompatibility.FullscreenExtension,
 		ScreenInsets = Enum.ScreenInsets.CoreUISafeInsets,
 		Parent = if Player then Player:WaitForChild("PlayerGui") else game:GetService("CoreGui"),
 		DisplayOrder = 7,
 		Children = {
-			_new("Frame")({
+			_new("CanvasGroup")({
 				Name = "TopBarFrame",
 				BackgroundTransparency = 1,
+				GroupTransparency = _Computed(function(isOpen: boolean): number
+					return if isOpen then 0 else 1
+				end, self.IsEnabled):Tween(
+					0.1,
+					Enum.EasingStyle.Cubic,
+					Enum.EasingDirection.Out
+				),
 				Position = _Computed(function(left: number, right: number, containerWidth: number, screenWidth: number): UDim2
 					if (0.5*screenWidth - math.max(right, left)) > containerWidth * 0.5 then
 						return UDim2.new(0.5, 0, 0, TOP_BAR_MARGIN)
@@ -165,9 +173,17 @@ function TopBar.new()
 					end
 				end, LeftMargin, RightMargin, AbsoluteWidth, ScreenWidth),
 				AnchorPoint = Vector2.new(0.5,0),
-				Size = _Computed(function(containerWidth: number, screenWidth: number): UDim2
-					return UDim2.new(0, containerWidth, 0, TOP_BAR_HEIGHT)
-				end, AbsoluteWidth, ScreenWidth),
+				Size = _Computed(function(containerWidth: number, screenWidth: number, isOpen: boolean): UDim2
+					if isOpen then
+						return UDim2.new(0, containerWidth, 0, TOP_BAR_HEIGHT)
+					else
+						return UDim2.new(0, 0, 0, TOP_BAR_HEIGHT)
+					end
+				end, AbsoluteWidth, ScreenWidth, self.IsEnabled):Tween(
+					0.1,
+					Enum.EasingStyle.Cubic,
+					Enum.EasingDirection.Out
+				),
 				Children = {
 					self._Frame
 				}
