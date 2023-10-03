@@ -197,7 +197,7 @@ function TopBarContainer:_UpdateClosedOffset()
 		if guiObject:IsA("GuiObject") then
 			local width = self._GuiWidths[guiObject] -- BUTTON_HEIGHT + BUTTON_PADDING
 			local button = buttonRegistry[guiObject]
-			if button and button.IsEnabled:Get() then
+			if button and not button.IsEnabled:Get() then
 				width *= 0
 			end
 			if guiObject.Visible == false then
@@ -227,12 +227,12 @@ function TopBarContainer:SetUnlockButton(button: TopBarButton?): ()
 		button.ReplaceIconWithXOnSelection:Set(true)
 		button.HighlightOnSelection:Set(true)
 		self._Maid._unlockSelection = button.IsSelected:Connect(function()
-			self.IsEnabled:Set(button.IsSelected:Get())
+			self.IsOpen:Set(button.IsSelected:Get())
 		end)
 		self._Maid._topDownUnlockSelection = self.IsEnabled:Connect(function()
-			button.IsSelected:Set(self.IsEnabled:Get())
+			button.IsSelected:Set(self.IsOpen:Get())
 		end)
-		button.IsSelected:Set(self.IsEnabled:Get())
+		button.IsSelected:Set(self.IsOpen:Get())
 		self:_UpdateClosedOffset()
 	else
 		self._HasUnlockButton:Set(false)
@@ -261,8 +261,9 @@ function TopBarContainer.new()
 	local _Value = _fuse.Value
 	local _Computed = _fuse.Computed
 
-	self.IsEnabled = _Value(false)
+	self.IsEnabled = _Value(true)
 	self.IsOpen = _Value(true)
+	self._HasUnlockButton = _Value(false)
 
 	self._Maid:GiveTask(self.IsEnabled:Connect(function()
 		if self.IsEnabled:Get() == false then
@@ -305,7 +306,6 @@ function TopBarContainer.new()
 		),
 		ClipsDescendants = false,
 		Children = {
-			
 			_new("UIListLayout")({
 				Padding = UDim.new(0, BUTTON_PADDING),
 				FillDirection = Enum.FillDirection.Horizontal,

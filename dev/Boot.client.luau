@@ -27,28 +27,28 @@ local _import = _fuse.import
 
 local _Value = _fuse.Value
 local _Computed = _fuse.Computed
+local firstContainer = PageService.TopBar:CreateContainer()
 
 do
-	local topBarContainer = PageService.TopBar:CreateContainer()
 
-	local initialButton = topBarContainer:CreateButton()
+	local initialButton = firstContainer:CreateButton()
 	initialButton.Instance.LayoutOrder = 9
 	initialButton.IconImage.Default:Set("http://www.roblox.com/asset/?id=11889177340")
 	initialButton.IconScale.Selection:Set(1)
 	initialButton.IconScale.Default:Set(0.7)
 	
 	do
-		local button = topBarContainer:CreateButton()
+		local button = firstContainer:CreateButton()
 		button.Instance.LayoutOrder = 3
 		button.IconScale.Default:Set(0.7)
 		button.IconImage.Default:Set("rbxassetid://10885637246")
 		button:SetOnClickInvoke(function()  
-			topBarContainer:ToggleExclusiveSelect(button)
+			firstContainer:ToggleExclusiveSelect(button)
 		end)
 	end
 	
 	do
-		local button = topBarContainer:CreateButton()
+		local button = firstContainer:CreateButton()
 		button.Instance.LayoutOrder = 6
 		button.ToolTip.Default:Set("A Tool-Tip!")
 		button.IconScale.Default:Set(0.7)
@@ -57,34 +57,34 @@ do
 		button.IconScale.Selection:Set(0.6)
 	
 		button:SetOnClickInvoke(function()  
-			topBarContainer:ToggleExclusiveSelect(button)
+			firstContainer:ToggleExclusiveSelect(button)
 		end)
 	end
 	
 	
 	do
-		local button = topBarContainer:CreateButton()
+		local button = firstContainer:CreateButton()
 		button.Instance.LayoutOrder = 4
 		button.IconScale.Default:Set(0.7)
 		button.IconImage.Default:Set("rbxassetid://13732884875")
 		button:SetOnClickInvoke(function()  
-			topBarContainer:ToggleExclusiveSelect(button)
+			firstContainer:ToggleExclusiveSelect(button)
 		end)
 	end
 
 	
-	local midFrame = topBarContainer:CreateFrame(120)
+	local midFrame = firstContainer:CreateFrame(120)
 	midFrame.LayoutOrder = 5
 	midFrame.BackgroundTransparency = 0.5
 
-	topBarContainer:SetUnlockButton(initialButton)
-	topBarContainer.IsEnabled:Set(false)
+	firstContainer:SetUnlockButton(initialButton)
+	firstContainer.IsEnabled:Set(true)
 
 end
 
 do
-	local topBarContainer = PageService.TopBar:CreateContainer()
-	topBarContainer.Instance.LayoutOrder = 2
+	local secondContainer = PageService.TopBar:CreateContainer()
+	secondContainer.Instance.LayoutOrder = 2
 
 	-- local initialButton = topBarContainer:CreateButton()
 	-- initialButton.Instance.LayoutOrder = 5
@@ -93,12 +93,14 @@ do
 	-- initialButton.IconScale.Default:Set(0.7)
 	
 	do
-		local button = topBarContainer:CreateButton()
+		local button = secondContainer:CreateButton()
 		button.Instance.LayoutOrder = 3
 		button.IconScale.Default:Set(0.7)
 		button.IconImage.Default:Set("rbxassetid://10885637246")
-		button:SetOnClickInvoke(function()  
-			topBarContainer:ToggleExclusiveSelect(button)
+		button.IsSelected:Set(true)
+		button:SetOnClickInvoke(function() 
+			button.IsSelected:Set(not button.IsSelected:Get())
+			firstContainer.IsEnabled:Set(button.IsSelected:Get())
 		end)
 	end
 	
@@ -118,15 +120,15 @@ do
 	
 	
 	do
-		local button = topBarContainer:CreateButton()
+		local button = secondContainer:CreateButton()
 		button.Instance.LayoutOrder = 4
 		button.IconScale.Default:Set(0.7)
 		button.IconImage.Default:Set("rbxassetid://13732884875")
 		button:SetOnClickInvoke(function()  
-			topBarContainer:ToggleExclusiveSelect(button)
+			secondContainer:ToggleExclusiveSelect(button)
 		end)
 	end
 	-- topBarContainer:SetUnlockButton(initialButton)
-	topBarContainer.IsEnabled:Set(true)
+	secondContainer.IsEnabled:Set(true)
 	
 end

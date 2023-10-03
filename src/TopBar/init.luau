@@ -112,12 +112,20 @@ function TopBar.new()
 
 	local LeftMargin = _Value(0)
 	local RightMargin = _Value(0)
+	self.IsEnabled = _Value(true)
 
 	self.AlignUsingMinimumFootprint = _Value(true)
 	self._Containers = {}
-	self._Frame = _new("Frame")({
+	self._Frame = _new("CanvasGroup")({
 		Name = "ContainerFrame",
 		BackgroundTransparency = 1,
+		GroupTransparency = _Computed(function(isOpen: boolean): number
+			return if isOpen then 0 else 1
+		end, self.IsEnabled):Tween(
+			0.1,
+			Enum.EasingStyle.Cubic,
+			Enum.EasingDirection.Out
+		),
 		AutomaticSize = Enum.AutomaticSize.X,
 		Position = UDim2.fromScale(1,0.5),
 		AnchorPoint = Vector2.new(1,0.5),
@@ -138,29 +146,20 @@ function TopBar.new()
 	local AbsoluteWidth = _Value(self._Frame.AbsoluteSize.X)
 	local ScreenWidth = _Value(workspace.CurrentCamera.ViewportSize.X)
 
-	self.IsEnabled = _Value(true)
-
 	self.Instance = _new("ScreenGui")({
 		Name = "TopBar",
 		IgnoreGuiInset = true,
 		ClipToDeviceSafeArea = true,
-		Enabled = self.IsEnabled,
+		Enabled = true,
 		ResetOnSpawn = false,
 		SafeAreaCompatibility = Enum.SafeAreaCompatibility.FullscreenExtension,
 		ScreenInsets = Enum.ScreenInsets.CoreUISafeInsets,
 		Parent = if Player then Player:WaitForChild("PlayerGui") else game:GetService("CoreGui"),
 		DisplayOrder = 7,
 		Children = {
-			_new("CanvasGroup")({
+			_new("Frame")({
 				Name = "TopBarFrame",
 				BackgroundTransparency = 1,
-				GroupTransparency = _Computed(function(isOpen: boolean): number
-					return if isOpen then 0 else 1
-				end, self.IsEnabled):Tween(
-					0.1,
-					Enum.EasingStyle.Cubic,
-					Enum.EasingDirection.Out
-				),
 				Position = _Computed(function(left: number, right: number, containerWidth: number, screenWidth: number): UDim2
 					if (0.5*screenWidth - math.max(right, left)) > containerWidth * 0.5 then
 						return UDim2.new(0.5, 0, 0, TOP_BAR_MARGIN)
