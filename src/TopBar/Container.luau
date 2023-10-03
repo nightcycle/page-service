@@ -229,7 +229,7 @@ function TopBarContainer:SetUnlockButton(button: TopBarButton?): ()
 		self._Maid._unlockSelection = button.IsSelected:Connect(function()
 			self.IsOpen:Set(button.IsSelected:Get())
 		end)
-		self._Maid._topDownUnlockSelection = self.IsEnabled:Connect(function()
+		self._Maid._topDownUnlockSelection = self.IsOpen:Connect(function()
 			button.IsSelected:Set(self.IsOpen:Get())
 		end)
 		button.IsSelected:Set(self.IsOpen:Get())
@@ -265,8 +265,8 @@ function TopBarContainer.new()
 	self.IsOpen = _Value(true)
 	self._HasUnlockButton = _Value(false)
 
-	self._Maid:GiveTask(self.IsEnabled:Connect(function()
-		if self.IsEnabled:Get() == false then
+	self._Maid:GiveTask(self.IsOpen:Connect(function()
+		if self.IsOpen:Get() == false then
 			for i, v in ipairs(self:GetButtons()) do
 				v.IsSelected:Set(false)
 			end
@@ -280,6 +280,15 @@ function TopBarContainer.new()
 		local anchorX = offsetX/openWidth
 		return anchorX
 	end, self._OpenWidth, self._ClosedOffsetX)
+
+	local GroupTransparency = _Computed(function(isOpen: boolean): number
+		return if isOpen then 0 else 1
+	end, self.IsEnabled):Tween(
+		0.1,
+		Enum.EasingStyle.Cubic,
+		Enum.EasingDirection.Out
+	)
+
 	self._ListFrame = _new("Frame")({
 		Name = "ButtonList",
 		BackgroundTransparency = 1,
@@ -315,17 +324,19 @@ function TopBarContainer.new()
 			}),
 		}
 	}) :: Frame
-	self.Instance = _new("CanvasGroup")({
+
+
+
+	self.Instance = _new("Frame")({
 		Name = "TopBarContainer",
 		BackgroundColor3 = CONTAINER_BACKGROUND_COLOR,
-		BackgroundTransparency = CONTAINER_BACKGROUND_TRANSPARENCY,
-		GroupTransparency = _Computed(function(isEnabled: boolean, openWidth: number, isOpen: boolean, hasUnlockButton: boolean): number
-			return if isEnabled and openWidth > 0 and (isOpen == true or hasUnlockButton) then 0 else 1
-		end, self.IsEnabled, self._OpenWidth, self.IsOpen, self._HasUnlockButton):Tween(
-			0.1,
-			Enum.EasingStyle.Cubic,
-			Enum.EasingDirection.Out
-		),
+		BackgroundTransparency = _Computed(function(groupTransparency: number)
+			return 1 - ((1-CONTAINER_BACKGROUND_TRANSPARENCY) * (1-groupTransparency))
+		end, GroupTransparency),
+		-- GroupTransparency = GroupTransparency,
+		Visible = _Computed(function(groupTransparency: number)
+			return groupTransparency < 1
+		end, GroupTransparency),
 		Size = _Computed(function(isOpen: boolean, openWidth: number, isEnabled: boolean, hasUnlockButton: boolean): UDim2
 			return UDim2.new(
 				0, 

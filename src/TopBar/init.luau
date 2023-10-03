@@ -114,18 +114,23 @@ function TopBar.new()
 	local RightMargin = _Value(0)
 	self.IsEnabled = _Value(true)
 
+	local GroupTransparency = _Computed(function(isOpen: boolean): number
+		return if isOpen then 0 else 1
+	end, self.IsEnabled):Tween(
+		0.1,
+		Enum.EasingStyle.Cubic,
+		Enum.EasingDirection.Out
+	)
+
 	self.AlignUsingMinimumFootprint = _Value(true)
 	self._Containers = {}
-	self._Frame = _new("CanvasGroup")({
+	self._Frame = _new("Frame")({
 		Name = "ContainerFrame",
 		BackgroundTransparency = 1,
-		GroupTransparency = _Computed(function(isOpen: boolean): number
-			return if isOpen then 0 else 1
-		end, self.IsEnabled):Tween(
-			0.1,
-			Enum.EasingStyle.Cubic,
-			Enum.EasingDirection.Out
-		),
+		-- GroupTransparency = GroupTransparency,
+		Visible = _Computed(function(groupTransparency: number)
+			return groupTransparency < 1
+		end, GroupTransparency),
 		AutomaticSize = Enum.AutomaticSize.X,
 		Position = UDim2.fromScale(1,0.5),
 		AnchorPoint = Vector2.new(1,0.5),

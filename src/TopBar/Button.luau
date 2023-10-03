@@ -150,6 +150,13 @@ function TopBarButton.new()
 		end
 	end, IsPressed, IsHovering, self.IsSelected)
 
+	local GroupTransparency = _Computed(function(isOpen: boolean): number
+		return if isOpen then 0 else 1
+	end, self.IsEnabled):Tween(
+		0.1,
+		Enum.EasingStyle.Cubic,
+		Enum.EasingDirection.Out
+	)
 
 	local ToolTip = _Computed(function(buttonState: ButtonState, defTip: string?, selectionTip: string?)
 		if buttonState == "Selected" then
@@ -264,14 +271,11 @@ function TopBarButton.new()
 				PaddingRight = UDim.new(0,BUTTON_BORDER),
 				PaddingLeft = UDim.new(0,BUTTON_BORDER),
 			}),
-			_new("CanvasGroup")({
-				GroupTransparency = _Computed(function(isEnabled: boolean): number
-					return if isEnabled then 0 else 1
-				end, self.IsEnabled):Tween(
-					0.25,
-					Enum.EasingStyle.Cubic,
-					Enum.EasingDirection.Out
-				),
+			_new("Frame")({
+				-- GroupTransparency = GroupTransparency,
+				Visible = _Computed(function(groupTransparency: number)
+					return groupTransparency < 1
+				end, GroupTransparency),
 				BackgroundTransparency = _Computed(function(buttonState: ButtonState, highlightOnSelection: boolean): number
 					if buttonState == "Pressed" then
 						return BUTTON_PRESS_TRANSPARENCY
