@@ -78,7 +78,7 @@ do
 	midFrame.BackgroundTransparency = 0.5
 
 	topBarContainer:SetUnlockButton(initialButton)
-	topBarContainer.IsOpen:Set(false)
+	topBarContainer.IsEnabled:Set(false)
 
 end
 
@@ -127,6 +127,6 @@ do
 		end)
 	end
 	-- topBarContainer:SetUnlockButton(initialButton)
-	topBarContainer.IsOpen:Set(true)
+	topBarContainer.IsEnabled:Set(true)
 	
 end
