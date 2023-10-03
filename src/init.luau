@@ -18,7 +18,9 @@ type Fuse = ColdFusion.Fuse
 type ValueState<T> = ColdFusion.ValueState<T>
 type State<T> = ColdFusion.State<T>
 type ParameterValue<T> = (State<T> | T)
-type TopBar = TopBar.TopBar
+export type TopBarButton = TopBar.TopBarButton
+export type TopBarContainer = TopBar.TopBarContainer
+export type TopBar = TopBar.TopBar
 export type PageService = {
 	__index: PageService,
 	_IsAlive: boolean,

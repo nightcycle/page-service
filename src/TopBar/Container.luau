@@ -16,7 +16,7 @@ local TopBarButton = require(_Package:WaitForChild("TopBar"):WaitForChild("Butto
 type Maid = Maid.Maid
 type State<V> = ColdFusion.State<V>
 type ValueState<V> = ColdFusion.ValueState<V>
-type TopBarButton = TopBarButton.TopBarButton
+export type TopBarButton = TopBarButton.TopBarButton
 export type TopBarContainer = {
 	__index: TopBarContainer,
 	_Maid: Maid,
@@ -32,6 +32,8 @@ export type TopBarContainer = {
 	_OpenWidth: ValueState<number>,
 	CreateFrame: (self: TopBarContainer, width: number) -> Frame,
 	CreateButton: (self: TopBarContainer) -> TopBarButton,
+	FindFirstButton: (self: TopBarContainer, name: string) -> TopBarButton?,
+	FindFirstFrame: (self: TopBarContainer, name: string) -> Frame?,
 	GetButtons: (self: TopBarContainer) -> {[number]: TopBarButton},
 	GetFrames: (self: TopBarContainer) -> {[number]: Frame},
 	SetUnlockButton: (self: TopBarContainer, topBarButton: TopBarButton?) -> (),
@@ -91,8 +93,26 @@ function TopBarContainer:CreateButton(): TopBarButton
 	return button
 end
 
+function TopBarContainer:FindFirstButton(name: string): TopBarButton?
+	for i, v in ipairs(self:GetButtons()) do
+		if v.Instance.Name == name then
+			return v
+		end
+	end
+	return nil
+end
+
 function TopBarContainer:GetFrames(): {[number]: Frame}
 	return table.clone(self._Frames)
+end
+
+function TopBarContainer:FindFirstFrame(name: string): Frame?
+	for i, v in ipairs(self:GetFrames()) do
+		if v.Name == name then
+			return v
+		end
+	end
+	return nil
 end
 
 function TopBarContainer:CreateFrame(width: number): Frame

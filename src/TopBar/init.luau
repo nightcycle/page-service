@@ -37,6 +37,7 @@ local Player = Players.LocalPlayer
 type Maid = Maid.Maid
 type ValueState<T> = ColdFusion.ValueState<T>
 type State<T> = ColdFusion.State<T>
+export type TopBarButton = Container.TopBarButton
 export type TopBarContainer = Container.TopBarContainer
 export type TopBar = {
 	__index: TopBar,
@@ -49,6 +50,7 @@ export type TopBar = {
 	AlignUsingMinimumFootprint: ValueState<boolean>,
 	CreateContainer: (self: TopBar) -> TopBarContainer,
 	GetContainers: (self: TopBar) -> {[number]: TopBarContainer},
+	FindFirstContainer: (self: TopBar, name: string) -> TopBarContainer?,
 	Destroy: (self: TopBar) -> (),
 	new: () -> TopBar,
 }
@@ -81,6 +83,15 @@ function TopBar:CreateContainer(): TopBarContainer
 	table.insert(self._Containers, container)
 	container.Instance.Parent = self._Frame
 	return container
+end
+
+function TopBar:FindFirstContainer(name: string): TopBarContainer?
+	for i, v in ipairs(self:GetContainers()) do
+		if v.Instance.Name == name then
+			return v
+		end
+	end
+	return nil
 end
 
 function TopBar.new()
