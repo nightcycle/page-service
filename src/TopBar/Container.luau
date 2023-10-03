@@ -27,7 +27,9 @@ export type TopBarContainer = {
 	_UnlockButton: TopBarButton?,
 	Instance: Frame,
 	_ListFrame: Frame,
+	IsOpen: ValueState<boolean>,
 	IsEnabled: ValueState<boolean>,
+	_HasUnlockButton: ValueState<boolean>,
 	_ClosedOffsetX: ValueState<number>,
 	_OpenWidth: ValueState<number>,
 	CreateFrame: (self: TopBarContainer, width: number) -> Frame,
@@ -75,13 +77,24 @@ function TopBarContainer:CreateButton(): TopBarButton
 
 	self._OpenWidth:Set(self._OpenWidth:Get() + BUTTON_HEIGHT + BUTTON_PADDING)
 
-	self._Maid:GiveTask(button.Instance:GetPropertyChangedSignal("Visible"):Connect(function(...: any)
-		if button.Instance.Visible then
+	-- self._Maid:GiveTask(button.Instance:GetPropertyChangedSignal("Visible"):Connect(function(...: any)
+	-- 	if button.Instance.Visible then
+	-- 		self._OpenWidth:Set(self._OpenWidth:Get() + BUTTON_HEIGHT + BUTTON_PADDING)
+	-- 	else
+	-- 		self._OpenWidth:Set(self._OpenWidth:Get() - BUTTON_HEIGHT - BUTTON_PADDING)
+	-- 	end
+	-- end))
+	self._Maid:GiveTask(button.IsEnabled:Connect(function()
+		if button == self._UnlockButton then
+			self._HasUnlockButton:Set(button.IsEnabled:Get())
+		end
+		if button.IsEnabled:Get() then
 			self._OpenWidth:Set(self._OpenWidth:Get() + BUTTON_HEIGHT + BUTTON_PADDING)
 		else
 			self._OpenWidth:Set(self._OpenWidth:Get() - BUTTON_HEIGHT - BUTTON_PADDING)
 		end
 	end))
+
 
 	self._Maid:GiveTask(button.Instance:GetPropertyChangedSignal("LayoutOrder"):Connect(function(...: any)
 		self:_UpdateClosedOffset()
@@ -204,6 +217,7 @@ end
 function TopBarContainer:SetUnlockButton(button: TopBarButton?): ()
 	self._UnlockButton = button
 	if button then
+		self._HasUnlockButton:Set(button.IsEnabled:Get())
 		button.ReplaceIconWithXOnSelection:Set(true)
 		button.HighlightOnSelection:Set(true)
 		self._Maid._unlockSelection = button.IsSelected:Connect(function()
@@ -214,6 +228,8 @@ function TopBarContainer:SetUnlockButton(button: TopBarButton?): ()
 		end)
 		button.IsSelected:Set(self.IsEnabled:Get())
 		self:_UpdateClosedOffset()
+	else
+		self._HasUnlockButton:Set(false)
 	end
 end
 
@@ -240,6 +256,7 @@ function TopBarContainer.new()
 	local _Computed = _fuse.Computed
 
 	self.IsEnabled = _Value(false)
+	self.IsOpen = _Value(true)
 
 	self._Maid:GiveTask(self.IsEnabled:Connect(function()
 		if self.IsEnabled:Get() == false then
@@ -268,7 +285,7 @@ function TopBarContainer.new()
 		),
 		Position =_Computed(function(anchorX: number, isOpen: boolean): UDim2
 			return UDim2.fromScale(if not isOpen then 0.5 else anchorX, 0)
-		end, AnchorX, self.IsEnabled):Tween(
+		end, AnchorX, self.IsOpen):Tween(
 			0.1,
 			Enum.EasingStyle.Quad,
 			Enum.EasingDirection.In
@@ -296,16 +313,27 @@ function TopBarContainer.new()
 		Name = "TopBarContainer",
 		BackgroundColor3 = CONTAINER_BACKGROUND_COLOR,
 		BackgroundTransparency = CONTAINER_BACKGROUND_TRANSPARENCY,
-		GroupTransparency = _Computed(function(isEnabled: boolean): number
-			return if isEnabled then 0 else 1
-		end, self.IsEnabled):Tween(
+		GroupTransparency = _Computed(function(isEnabled: boolean, openWidth: number, isOpen: boolean, hasUnlockButton: boolean): number
+			return if isEnabled and openWidth > 0 and (isOpen == true or hasUnlockButton) then 0 else 1
+		end, self.IsEnabled, self._OpenWidth, self.IsOpen, self._HasUnlockButton):Tween(
 			0.1,
 			Enum.EasingStyle.Cubic,
 			Enum.EasingDirection.Out
 		),
-		Size = _Computed(function(isEnabled: boolean, openWidth: number): UDim2
-			return UDim2.new(0, if isEnabled then openWidth else CLOSED_WIDTH, 0, BUTTON_HEIGHT)
-		end, self.IsEnabled, self._OpenWidth):Tween(
+		Size = _Computed(function(isOpen: boolean, openWidth: number, isEnabled: boolean, hasUnlockButton: boolean): UDim2
+			return UDim2.new(
+				0, 
+				if isEnabled then
+					if hasUnlockButton then
+						if isOpen then openWidth else CLOSED_WIDTH
+					else
+						if isOpen then openWidth else 0
+				else
+					0,
+				0, 
+				BUTTON_HEIGHT
+			)
+		end, self.IsOpen, self._OpenWidth, self.IsEnabled, self._HasUnlockButton):Tween(
 			0.1,
 			Enum.EasingStyle.Quad,
 			Enum.EasingDirection.In
