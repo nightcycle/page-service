@@ -1,2 +1,2 @@
-# package
-A basic template for whenever I make a wally package
+# page-service
+A quick to deploy HUD that blends in with the CoreGui
