@@ -1,0 +1,10 @@
+[package]
+name = "nightcycle/service-proxy"
+description = "A wally package that creates an object that points towards a constructed service"
+version = "1.0.5"
+authors = ["CJ Oyer <coyer@nightcycle.us>"]
+realm = "shared"
+registry = "https://github.com/upliftgames/wally-index"
+exclude = ["Packages", ".vscode"]
+
+[dependencies]

@@ -1,0 +1,11 @@
+{
+	"name": "service-proxy-dev",
+	"tree": {
+	    "$className": "DataModel",
+	    "ReplicatedStorage": {
+		   "service-proxy": {
+			  "$path": "src"
+		   }
+	    }
+	}
+ }

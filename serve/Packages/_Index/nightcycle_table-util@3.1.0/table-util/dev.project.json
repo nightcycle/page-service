@@ -1,0 +1,11 @@
+{
+	"name": "table-util-dev",
+	"tree": {
+	    "$className": "DataModel",
+	    "ReplicatedStorage": {
+		   "table-util": {
+			  "$path": "src"
+		   }
+	    }
+	}
+ }

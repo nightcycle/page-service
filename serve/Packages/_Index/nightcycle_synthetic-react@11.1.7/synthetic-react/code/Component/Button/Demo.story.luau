@@ -1,0 +1,86 @@
+--!strict
+--!native
+-- Services
+-- @Packages
+local React = require(script.Parent.Parent.Parent.Parent:WaitForChild('React'))
+local ReactRoblox = require(script.Parent.Parent.Parent.Parent:WaitForChild('ReactRoblox'))
+local MaterialIcons = require(script.Parent.Parent.Parent.Parent:WaitForChild('MaterialIcons'))-- Modules
+
+local RobloxTypes = require(script.Parent.Parent.Parent:WaitForChild('RobloxTypes'))
+local Enums = require(script.Parent.Parent.Parent:WaitForChild('Enums'))
+-- Types
+-- Constants
+-- Variables
+-- References
+-- Private Functions
+
+local e = React.createElement
+-- Class
+return function(target: Frame)
+	local folder = Instance.new("Folder")
+	local root = ReactRoblox.createRoot(folder)
+
+	local IconButton = require(script.Parent)	
+local Style = require(script.Parent.Parent.Parent:WaitForChild('Style'))	
+local Theme = require(script.Parent.Parent.Parent:WaitForChild('Theme'))	
+local Typography = require(script.Parent.Parent.Parent:WaitForChild('Typography'))	
+local style = Style.new(
+		1,
+		0.5,
+		true,
+		Theme.new(Color3.new(1, 0, 0), "Dark", 0),
+		Typography.fromFont(Enum.Font.BuilderSans)
+	)
+
+	local function newButton(renderType: Enums.ButtonRenderType)
+		local lineColorRole = if renderType == Enums.ButtonRenderType.Filled
+			then Enums.ColorRoleType.OnPrimary
+			else Enums.ColorRoleType.OnSurface
+		return e(
+			IconButton.Full,
+			{
+				AutomaticSize = Enum.AutomaticSize.XY,
+				Position = UDim2.new(0.5, 0, 0.5, 0),
+				AnchorPoint = Vector2.new(0.5, 0.5),
+				Type = renderType,
+
+				FillColor3 = style.Theme.Primary,
+				IconColor3 = style.Theme[lineColorRole],
+				Icon = MaterialIcons.watch_later,
+				IsAnimated = true,
+				[React.Event.Activated] = function()
+					print(`click "{renderType}"`)
+				end :: any,
+			} :: IconButton.ButtonProperties
+		)
+	end
+
+	local element = e("Frame", {
+		Size = UDim2.new(1, 0, 1, 0),
+		BorderSizePixel = 0,
+		BackgroundColor3 = style.Theme.Surface,
+	}, {
+
+		FilledButton = newButton(Enums.ButtonRenderType.Filled),
+		OutlinedButton = newButton(Enums.ButtonRenderType.Outlined),
+		TextButton = newButton(Enums.ButtonRenderType.TextIcon),
+		UIListLayout = e(
+			"UIListLayout",
+			{
+				SortOrder = Enum.SortOrder.LayoutOrder,
+				FillDirection = Enum.FillDirection.Horizontal,
+				VerticalAlignment = Enum.VerticalAlignment.Center,
+				HorizontalAlignment = Enum.HorizontalAlignment.Center,
+				Padding = UDim.new(0, math.round(10 * style.Scale)),
+			} :: RobloxTypes.UIListLayoutProperties
+		),
+	})
+
+	local portal = ReactRoblox.createPortal(element, target)
+	root:render(portal)
+
+	return function()
+		root:unmount()
+		folder:Destroy()
+	end
+end

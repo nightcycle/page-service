@@ -2,8 +2,6 @@ name: Validate Commit
 
 on:
   push:
-    branches:
-      - main
 
 jobs:
 
@@ -17,9 +15,9 @@ jobs:
           - name: main
 
     env:
-      ROJO_CONFIG: default.project.json
-      LC_ALL: C.UTF-8  # Set the locale to UTF-8
-      LANG: C.UTF-8    # Set the language to UTF-8
+      LC_ALL: C.UTF-8
+      LANG: C.UTF-8
+      ROJO_CONFIG: "dev.project.json"
     steps:
       - uses: actions/checkout@v2
 
@@ -27,9 +25,8 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: run code-gen
-        run: sh scripts/code-gen.sh
+      - name: install wally
+        run: sh scripts/wally-install.sh "${{env.ROJO_CONFIG}}"
 
-      - name: lint and typecheck
-        run: sh scripts/validate.sh ${{env.ROJO_CONFIG}} --download
-
+      - name: validate project
+        run: sh scripts/validate.sh "${{env.ROJO_CONFIG}}"

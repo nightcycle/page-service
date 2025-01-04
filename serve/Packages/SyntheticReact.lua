@@ -1,0 +1,43 @@
+local REQUIRED_MODULE = require(script.Parent._Index["nightcycle_synthetic-react@11.1.7"]["synthetic-react"])
+export type ImageData = REQUIRED_MODULE.ImageData 
+export type ButtonData = REQUIRED_MODULE.ButtonData 
+export type FontData = REQUIRED_MODULE.FontData 
+export type Style = REQUIRED_MODULE.Style 
+export type Typography = REQUIRED_MODULE.Typography 
+export type Theme = REQUIRED_MODULE.Theme 
+export type SoundType = REQUIRED_MODULE.SoundType 
+export type FontType = REQUIRED_MODULE.FontType 
+export type ButtonStateType = REQUIRED_MODULE.ButtonStateType 
+export type SchemeType = REQUIRED_MODULE.SchemeType 
+export type CustomColorType = REQUIRED_MODULE.CustomColorType 
+export type SelectionState = REQUIRED_MODULE.SelectionState 
+export type ColorRoleType = REQUIRED_MODULE.ColorRoleType 
+export type PaletteType = REQUIRED_MODULE.PaletteType 
+export type TransitionType = REQUIRED_MODULE.TransitionType 
+export type ButtonProperties = REQUIRED_MODULE.ButtonProperties 
+export type StyleButtonProperties = REQUIRED_MODULE.StyleButtonProperties 
+export type ButtonContainerContentProperties =
+REQUIRED_MODULE.ButtonContainerContentProperties 
+export type ButtonContainerProperties = REQUIRED_MODULE.ButtonContainerProperties 
+export type CheckboxProperties = REQUIRED_MODULE.CheckboxProperties 
+export type StyleCheckboxProperties = REQUIRED_MODULE.StyleCheckboxProperties 
+export type IconDisplayProperties = REQUIRED_MODULE.IconDisplayProperties 
+export type MenuProperties = REQUIRED_MODULE.MenuProperties 
+export type StylePaddingProperties = REQUIRED_MODULE.StylePaddingProperties 
+export type StylePaddingSimpleProperties = REQUIRED_MODULE.StylePaddingSimpleProperties 
+export type PopUpProperties = REQUIRED_MODULE.PopUpProperties 
+export type PopUpContainerProperties = REQUIRED_MODULE.PopUpContainerProperties 
+export type ProgressIndicatorCircularProperties =
+REQUIRED_MODULE.ProgressIndicatorCircularProperties 
+export type ShadowFrameProperties = REQUIRED_MODULE.ShadowFrameProperties 
+export type SliderProperties = REQUIRED_MODULE.SliderProperties 
+export type StyleSliderProperties = REQUIRED_MODULE.StyleSliderProperties 
+export type SwitchProperties = REQUIRED_MODULE.SwitchProperties 
+export type StyleSwitchProperties = REQUIRED_MODULE.StyleSwitchProperties 
+export type RadioButtonProperties = REQUIRED_MODULE.RadioButtonProperties 
+export type StyleRadioButtonProperties = REQUIRED_MODULE.StyleRadioButtonProperties 
+export type TextDisplayProperties = REQUIRED_MODULE.TextDisplayProperties 
+export type StyleTextDisplayProperties = REQUIRED_MODULE.StyleTextDisplayProperties 
+export type TextFieldProperties = REQUIRED_MODULE.TextFieldProperties 
+export type StyleTextFieldProperties = REQUIRED_MODULE.StyleTextFieldProperties 
+return REQUIRED_MODULE

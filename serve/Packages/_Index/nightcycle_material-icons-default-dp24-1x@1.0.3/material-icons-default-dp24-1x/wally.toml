@@ -1,0 +1,8 @@
+[package]
+name = "nightcycle/material-icons-default-dp24-1x"
+description = "a port of the material icons with all style permutations"
+version = "1.0.3"
+authors = ["CJ Oyer <coyer@nightcycle.us>"]
+realm = "shared"
+registry = "https://github.com/upliftgames/wally-index"
+exclude = ["Packages", ".vscode"]
