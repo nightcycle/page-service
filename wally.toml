@@ -8,7 +8,7 @@ registry = "https://github.com/upliftgames/wally-index"
 exclude = [ "Packages", ".vscode",]
 
 [dependencies]
-SyntheticReact = "nightcycle/synthetic-react@11.1.7"
+Synthetic = "nightcycle/synthetic-react@11.1.7"
 Maid = "nightcycle/maid@2.2.2"
 ServiceProxy = "nightcycle/service-proxy@1.0.5"
 React = "jsdotlua/react@17.2.1"

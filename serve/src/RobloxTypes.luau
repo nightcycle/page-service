@@ -486,7 +486,7 @@ end
 
 Util.mergeGuiBase = Util.mergeInstance
 
-function Util.mergeGuiObject2D(
+function Util.mergeGuiBase2D(
 	element: GuiBase2dProperties,
 	props: GuiBase2dProperties
 ): GuiBase2dProperties
@@ -507,11 +507,42 @@ function Util.mergeGuiObject2D(
 	return out
 end
 
+function Util.mergeLayerCollector(
+	element: LayerCollectorProperties,
+	props: LayerCollectorProperties
+): LayerCollectorProperties
+	local out = Util.mergeGuiBase2D(element, props) :: LayerCollectorProperties
+	out.Enabled = if element.Enabled ~= nil then element.Enabled else props.Enabled
+	out.ResetOnSpawn = if element.ResetOnSpawn ~= nil
+		then element.ResetOnSpawn
+		else props.ResetOnSpawn
+	out.ZIndexBehavior = element.ZIndexBehavior or props.ZIndexBehavior
+	return out
+end
+
+function Util.mergeScreenGui(
+	element: ScreenGuiProperties,
+	props: ScreenGuiProperties
+)
+	local out = Util.mergeLayerCollector(element, props) :: ScreenGuiProperties
+	out.ClipToDeviceSafeArea = if element.ClipToDeviceSafeArea ~= nil
+		then element.ClipToDeviceSafeArea
+		else props.ClipToDeviceSafeArea
+	out.DisplayOrder = element.DisplayOrder or props.DisplayOrder
+	out.IgnoreGuiInset = if element.IgnoreGuiInset ~= nil
+		then element.IgnoreGuiInset
+		else props.IgnoreGuiInset
+	out.SafeAreaCompatibility = element.SafeAreaCompatibility
+		or props.SafeAreaCompatibility
+	out.ScreenInsets = element.ScreenInsets or props.ScreenInsets
+	return out
+end
+
 function Util.mergeGuiObject(
 	element: GuiObjectProperties,
 	props: GuiObjectProperties
 ): GuiObjectProperties
-	local out = Util.mergeGuiObject2D(element, props) :: GuiObjectProperties
+	local out = Util.mergeGuiBase2D(element, props) :: GuiObjectProperties
 	out.Active = if element.Active ~= nil then element.Active else props.Active
 	out.AnchorPoint = element.AnchorPoint or props.AnchorPoint
 	out.AutomaticSize = element.AutomaticSize or props.AutomaticSize
