@@ -6,14 +6,31 @@ local React = require(script.Parent.Parent.Parent:WaitForChild('React'))
 local Synthetic = require(script.Parent.Parent.Parent:WaitForChild('Synthetic'))-- Modules
 
 local RobloxTypes = require(script.Parent.Parent:WaitForChild('RobloxTypes'))
-local Config = require(script.Parent.Parent:WaitForChild('Config'))-- Hooks
+local Config = require(script.Parent.Parent:WaitForChild('Config'))-- Components
+
+local Container = require(script.Parent:WaitForChild('Container'))-- Hooks
 
 local useViewportSize = require(script.Parent.Parent:WaitForChild('Hooks'):WaitForChild('useViewportSize'))
 local useCoreGuiEnabled = require(script.Parent.Parent:WaitForChild('Hooks'):WaitForChild('useCoreGuiEnabled'))-- Types
 
+type ButtonData = Synthetic.ButtonData
+export type ContainerDisplayProperties = RobloxTypes.FrameProperties & {
+	IsExpanded: boolean,
+	Position: UDim2,
+	Size: UDim2
+}
+export type ContainerData = {
+	IsEnabled: boolean,
+	IsExpanded: boolean,
+	ExpansionButton: ButtonData?,
+	SelectionIndex: number?,
+	Buttons: {ButtonData},
+	DisplayConstructor: ((props: ContainerDisplayProperties) -> (React.ReactNode?))?
+}
 export type TopBarProperties = RobloxTypes.ScreenGuiProperties & {
 	AlignUsingMinimumFootprint: boolean,
-	IsOpen: boolean
+	IsOpen: boolean,
+	Containers: {ContainerData}
 }
 -- Constants
 local TOP_BAR_HEIGHT = Config.HEIGHT
@@ -44,7 +61,7 @@ return function(props: TopBarProperties): React.ReactNode
 		if isOpen then 1 else 0,
 		0.1,
 		true
-	), Enum.EasingStyle.Cubic, Enum.EasingDirection.Out)
+	), Enum.EasingStyle.Cubic, Enum.EasingDirection.In)
 	local viewportSize = useViewportSize()
 	local coreGuiEnabled = useCoreGuiEnabled()
 
@@ -91,6 +108,7 @@ return function(props: TopBarProperties): React.ReactNode
 		IgnoreGuiInset = props.IgnoreGuiInset or true,
 		ClipToDeviceSafeArea = props.ClipToDeviceSafeArea or true,
 		DisplayOrder = props.DisplayOrder or 10,
+		ResetOnSpawn = if typeof(props.ResetOnSpawn) == "nil" then false else props.ResetOnSpawn,
 		children = {
 			TopBarFrame = e("Frame", {
 				BackgroundTransparency = 1,
@@ -105,9 +123,8 @@ return function(props: TopBarProperties): React.ReactNode
 				Size = if isOpen then UDim2.fromOffset(absoluteWidth*isOpenAlpha, TOP_BAR_HEIGHT)
 					else UDim2.fromOffset(0, TOP_BAR_HEIGHT),
 				children = {
-					ContainerFrame = e("Frame", {
+					ContainerFrame = if isOpenAlpha <= 0 then nil else e("Frame", {
 						BackgroundTransparency = 1,
-						Visible = isOpenAlpha > 0,
 						AutomaticSize = Enum.AutomaticSize.X,
 						Position = UDim2.fromScale(1,0.5),
 						AnchorPoint = Vector2.new(1,0.5),
@@ -116,7 +133,7 @@ return function(props: TopBarProperties): React.ReactNode
 							if inst.AbsoluteSize.X ~= absoluteWidth then
 								setAbsoluteWidth(inst.AbsoluteSize.X)
 							end
-						end,
+						end :: any,
 						children = {
 							UIPadding = e("UIPadding", {
 								PaddingLeft = UDim.new(0, TOP_BUTTON_PADDING),
