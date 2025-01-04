@@ -1,0 +1,10 @@
+{
+	"recommendations": [
+		"formulahendry.code-runner",
+		"tamasfe.even-better-toml",
+		"johnnymorganz.luau-lsp",
+		"redhat.vscode-yaml",
+		"pucelle.run-on-save",
+		"pomdtr.secrets"
+	]
+}

@@ -10,15 +10,6 @@
 		   "$path": "src"
 		 }
 	    }
-	  },
-	  "StarterPlayer": {
-		"$className": "StarterPlayer",
-		"StarterPlayerScripts": {
-			"$className": "StarterPlayerScripts",
-			"Boot": {
-				"$path": "dev/Boot.client.luau"
-			}
-		}
 	  }
 	}
    }

@@ -1,0 +1,11 @@
+{
+	"languageMode": "strict",
+	"lintErrors": true,
+	"lint": {
+		"*": true
+	},
+	"aliases": {
+		"proj": "./src",
+		"wally": "./Packages"
+	}
+}

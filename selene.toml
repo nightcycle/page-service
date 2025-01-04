@@ -1,17 +1,22 @@
 std = "lints/luau+roblox"
 exclude = [
-	"out/*", 
+	"out/*",
 	"*.spec.lua",
-	"*.spec.luau",  
-	"*.remodel.lua", 
+	"*.spec.luau",
+	"*.remodel.lua",
 	"*.rbxmk.lua",
 	"*.d.lua",
 	"*.story.lua",
 	"*.story.luau",
-	"gamework/*", 
-	"scripts/*", 
+	"src/Server/MobUtil/Animation/**",
+	"scripts/*",
 ]
 [lints]
+empty_loop = "allow"
 unused_variable = "allow"
 empty_if = "allow"
 if_same_then_else = "allow"
+incorrect_standard_library_use = "allow"
+shadowing = "deny"
+multiple_statements = "allow"
+bad_string_escape = "allow"

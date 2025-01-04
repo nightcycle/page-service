@@ -1,0 +1,65 @@
+{
+	"import etype": {
+		"prefix": "import etype",
+		"body": [
+			"export type $name = $name.$name"
+		],
+		"description": "Unpacks and exports a type.",
+		"scope": "lua,luau"
+	},
+	"import ptype": {
+		"prefix": "import ptype",
+		"body": [
+			"type $name = $name.$name"
+		],
+		"description": "Unpacks and a type.",
+		"scope": "lua,luau"
+	},
+	"import bench": {
+		"prefix": "import bench",
+		"body": [
+			"--!strict",
+			"--!native",
+			"-- Services",
+			"-- Packages",
+			"-- Modules",
+			"-- Types",
+			"-- Constants",
+			"-- Variables",
+			"-- References",
+			"-- Private Functions",
+			"-- Class",
+			"local Module: BenchModule<$param> = {",
+			"\tParameterGenerator = function(): $param",
+			"\t\t",
+			"\tend,",
+			"\tFunctions = {",
+			"\t\t[\"$func\"] = function(profiler: Profiler, parameter: $param) end,",
+			"\t},",
+			"}",
+			"",
+			"return Module"
+		],
+
+		"description": "Sets up a benchmark module.",
+		"scope": "*lua,luau"
+	},
+	"import header": {
+		"prefix": "import header",
+		"body": [
+			"--!strict",
+			"--!native",
+			"-- Services",
+			"-- Packages",
+			"-- Modules",
+			"-- Types",
+			"-- Constants",
+			"-- Variables",
+			"-- References",
+			"-- Private Functions",
+			"-- Class",
+		],
+		"description": "A basic header for a file.",
+		"scope": "lua,luau"
+	},
+}

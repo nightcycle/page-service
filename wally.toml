@@ -8,6 +8,10 @@ registry = "https://github.com/upliftgames/wally-index"
 exclude = [ "Packages", ".vscode",]
 
 [dependencies]
-ColdFusion = "nightcycle/cold-fusion@9.0.7"
-Maid = "nightcycle/maid@1.1.4"
-ServiceProxy = "nightcycle/service-proxy@1.0.0"
+SyntheticReact = "nightcycle/synthetic-react@11.1.7"
+Maid = "nightcycle/maid@2.2.2"
+ServiceProxy = "nightcycle/service-proxy@1.0.5"
+React = "jsdotlua/react@17.2.1"
+ReactRoblox = "jsdotlua/react-roblox@17.2.1"
+MaterialIcons = "nightcycle/material-icons-default-dp24-1x@1.0.3"
+OutlinedMaterialIcons = "nightcycle/material-icons-outlined-dp24-1x@1.0.3"

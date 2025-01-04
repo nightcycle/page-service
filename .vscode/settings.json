@@ -1,0 +1,139 @@
+{
+	"[github-actions-workflow]": {
+		"editor.tabSize": 2,
+		"editor.insertSpaces": true,
+		"editor.detectIndentation": false
+	},
+	"json.schemas": [
+		{
+			"fileMatch": [
+				"**/*.project.json"
+			],
+			"schema": {
+				"$schema": "http://json-schema.org/draft-07/schema#",
+				"required": [
+					"name",
+					"tree"
+				],
+				"type": "object",
+				"properties": {
+					"name": {
+						"type": "string",
+						"description": "A string indicating the name of the project. This name is used when building the project into a model or place file.",
+					},
+					"placeId": {
+						"type": "integer",
+						"description": "Sets the current place's place ID when connecting to the Rojo server from Roblox Studio."
+					},
+					"gameId": {
+						"type": "integer",
+						"description": "Sets the current place's game ID when connecting to the Rojo server from Roblox Studio."
+					},
+					"servePort": {
+						"type": "integer",
+						"default": 34872,
+						"description": "The port that rojo serve should listen on. Passing --port will override this setting."
+					},
+					"serveAddress": {
+						"type": "string",
+						"description": "If specified, this address will be used in place of the default address, as long as --address is unprovided."
+					},
+					"servePlaceIds": {
+						"type": "array",
+						"description": "A list of place IDs that this project may be live-synced to. This feature can help prevent overwriting the wrong game with source from Rojo.",
+						"items": {
+							"type": "integer"
+						}
+					},
+					"globIgnorePaths": {
+						"type": "array",
+						"description": "A list of globs of paths to ignore.",
+						"items": {
+							"type": "string"
+						}
+					},
+					"emitLegacyScripts": {
+						"type": "boolean",
+						"description": "A boolean specifying whether Rojo should use both Script and LocalScript Instances instead of just Script Instances with their RunContext set.",
+						"default": true
+					},
+					"tree": {
+						"$id": "tree",
+						"type": "object",
+						"description": "An Instance Description describing the root instance of the project.",
+						"properties": {
+							"$className": {
+								"type": "string"
+							},
+							"$ignoreUnknownInstances": {
+								"type": "boolean"
+							},
+							"$path": {
+								"type": "string"
+							},
+							"$properties": {
+								"type": "object"
+							}
+						},
+						"patternProperties": {
+							"^[^\\$].*$": {
+								"$ref": "tree"
+							}
+						}
+					}
+				}
+			}
+		}
+	],
+	"files.exclude": {
+		"lints": true,
+		"types": true,
+		"wally.lock": true,
+		"Packages": true,
+		"serve": true,
+		"sourcemap.json": true,
+		"*.rbxl": true,
+		"*.rbxl.lock": true,
+		"*.blend": true,
+		"*.blend1": true,
+		"build": true,
+		"deps": true,
+	},
+	"runOnSave.defaultRunIn": "terminal",
+	"runOnSave.shell": "C:/Program Files/Git/bin/bash.exe",
+	"runOnSave.statusMessageTimeout": 30000,
+	"runOnSave.onlyRunOnManualSave": false,
+	"runOnSave.commands": [
+		{
+			"globMatch": "*\\.luau$",
+			"command": "darklua process 'lib' 'serve/lib' --config '.darklua.json' -w",
+			"async": false,
+			"runIn": "terminal",
+			"runningStatusMessage": "darklua processing",
+			"finishStatusMessage": "finished darklua processing",
+		}
+	],
+	"luau-lsp.fflags.override": {
+		"LuauTypeInferIterationLimit": "0",
+		"LuauCheckRecursionLimit": "0",
+		"LuauTypeInferRecursionLimit": "0",
+		"LuauTarjanChildLimit": "0",
+		"LuauTypeInferTypePackLoopLimit": "0",
+		"LuauVisitRecursionLimit": "0",
+		"LuauTypeMaximumStringifierLength": "0",
+		"LuauTableTypeMaximumStringifierLength": "0",
+	},
+	"[luau]": {
+		"editor.defaultFormatter": "JohnnyMorganz.stylua"
+	},
+	"luau-lsp.completion.imports.ignoreGlobs": [
+		"deps",
+		"types",
+		"serve",
+		"build",
+		"Packages",
+	],
+	"stylua.configPath": "stylua.toml",
+	"stylua.targetReleaseVersion": "latest",
+	"secrets.enabledFolders": [],
+}
